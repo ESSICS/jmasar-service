@@ -1,0 +1,10 @@
+# Eclipse specific files
+**/.project
+**/.settings
+**/.classpath
+
+# Output files
+**/target/*
+
+#Mac OS stuff
+**/.DS_Store

@@ -2,9 +2,11 @@
 **/.project
 **/.settings
 **/.classpath
+**/.factorypath
 
 # Output files
 **/target/*
+**/bin/*
 
 #Mac OS stuff
 **/.DS_Store

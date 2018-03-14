@@ -22,5 +22,6 @@ public class Snapshot {
 	private int username_id;
 	private String comment;
 	
+	@SuppressWarnings("rawtypes")
 	private List<SnapshotPv> snapshotPvList;
 }

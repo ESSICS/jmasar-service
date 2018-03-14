@@ -16,7 +16,7 @@ public class EpicsService implements IEpicsService {
 	private PvaClient pvaClient;
 
 	@Override
-	public <T>  SnapshotPv<T> getPv(String pvName) throws PVReadException{
+	public <T> SnapshotPv<T> getPv(String pvName) throws PVReadException{
 
 		if (pvaClient == null)
 			pvaClient = PvaClient.get("pva ca");
@@ -30,4 +30,14 @@ public class EpicsService implements IEpicsService {
 			throw new PVReadException("Unable to read PV " + pvName);
 		}
 	}
+	
+	public static void main(String[] args) {
+		try {
+			new EpicsService().getPv("georgweiss:OUT1:TEMP");
+		} catch (PVReadException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 }

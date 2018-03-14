@@ -29,9 +29,9 @@ public class SnapshotController extends BaseController{
 	
 	@ApiOperation(value = "Retrieve snapshot values")
 	@GetMapping("/snapshot/{snapshotId}/values")
-	public List<SnapshotPv> getSnapshotPvs(@PathVariable int snapshotId) {
+	public <T> List<SnapshotPv<T>> getSnapshotPvs(@PathVariable int snapshotId) {
 
-		return services.getSnapshotPvs(snapshotId);
+		return services.getSnapshotPvValues(snapshotId);
 	}
 	
 	@ApiOperation(value = "Get a snapshot")

@@ -57,7 +57,7 @@ public class ConfigJdbcDAO implements ConfigDAO {
 		
 		int configPvId = 0;
 		
-		if(list != null && !list.isEmpty()) {
+		if(!list.isEmpty()) {
 			configPvId = list.get(0);
 		}
 		else {

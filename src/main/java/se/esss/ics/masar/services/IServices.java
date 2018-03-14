@@ -22,7 +22,7 @@ public interface IServices {
 	
 	public Snapshot getSnapshot(int snapshotId);
 	
-	public List<SnapshotPv> getSnapshotPvs(int snapshotId);
+	public <T> List<SnapshotPv<T>> getSnapshotPvValues(int snapshotId);
 	
 	public void deleteSnapshot(int snapshotId);
 }

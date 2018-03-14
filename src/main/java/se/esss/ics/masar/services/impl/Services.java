@@ -89,9 +89,8 @@ public class Services implements IServices{
 	}
 	
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List<SnapshotPv> getSnapshotPvs(int snapshotId){
-		return snapshotDAO.getSnapshotPvs(snapshotId);
+	public <T> List<SnapshotPv<T>> getSnapshotPvValues(int snapshotId){
+		return snapshotDAO.getSnapshotPvValues(snapshotId);
 	}
 	
 	@Override

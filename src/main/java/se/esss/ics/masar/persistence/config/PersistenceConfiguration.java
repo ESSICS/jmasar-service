@@ -17,65 +17,69 @@ import com.zaxxer.hikari.HikariDataSource;
 @PropertySource("classpath:/${dbengine}.properties")
 public class PersistenceConfiguration {
 
-	
 	@Bean
 	@ConfigurationProperties(prefix = "spring.datasource")
 	public HikariDataSource dataSource() {
-	    return (HikariDataSource) DataSourceBuilder.create()
-	            .type(HikariDataSource.class).build();
+		HikariDataSource dataSource = (HikariDataSource) DataSourceBuilder.create().type(HikariDataSource.class)
+				.build();
+
+		// HikariConfig hikariConfig = new HikariConfig();
+		// hikariConfig.setJdbcUrl(environment.getProperty("spring.datasource.jdbcUrl"));
+		// HikariDataSource dataSource = new HikariDataSource(hikariConfig);
+		return dataSource;
 	}
-	
+
 	@Bean
 	public SimpleJdbcInsert configurationInsert() {
 		DataSource dataSource = dataSource();
-		
+
 		return new SimpleJdbcInsert(dataSource).withTableName("config").usingGeneratedKeyColumns("id");
 	}
-	
+
 	@Bean
 	public SimpleJdbcInsert configurationEntryInsert() {
 		DataSource dataSource = dataSource();
-		
+
 		return new SimpleJdbcInsert(dataSource).withTableName("config_pv").usingGeneratedKeyColumns("id");
 	}
-	
+
 	@Bean
 	public SimpleJdbcInsert configurationEntryRelationInsert() {
 		DataSource dataSource = dataSource();
-		
+
 		return new SimpleJdbcInsert(dataSource).withTableName("config_pv_relation");
 	}
-	
+
 	@Bean
 	public SimpleJdbcInsert snapshotInsert() {
 		DataSource dataSource = dataSource();
-		
+
 		return new SimpleJdbcInsert(dataSource).withTableName("snapshot").usingGeneratedKeyColumns("id");
 	}
-	
+
 	@Bean
 	public SimpleJdbcInsert snapshotPvInsert() {
 		DataSource dataSource = dataSource();
-		
+
 		return new SimpleJdbcInsert(dataSource).withTableName("snapshot_pv").usingGeneratedKeyColumns("id");
 	}
-	
+
 	@Bean
 	public SimpleJdbcInsert userNameInsert() {
 		DataSource dataSource = dataSource();
-		
+
 		return new SimpleJdbcInsert(dataSource).withTableName("userName").usingGeneratedKeyColumns("id");
 	}
-	
+
 	@Bean
 	public JdbcTemplate jdbcTemplate() {
 		DataSource dataSource = dataSource();
 		return new JdbcTemplate(dataSource);
 	}
-	
+
 	@Bean
 	public ObjectMapper objectMapper() {
 		return new ObjectMapper();
 	}
-	
+
 }

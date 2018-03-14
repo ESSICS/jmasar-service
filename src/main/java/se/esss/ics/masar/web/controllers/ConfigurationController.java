@@ -32,7 +32,7 @@ public class ConfigurationController extends BaseController{
 		return services.getConfigs();
 	}
 	
-	@ApiOperation(value = "Get configurations from config id")
+	@ApiOperation(value = "Get PVs from config id")
 	@GetMapping("/config/{configId}")
 	public Config getConfiguration(@PathVariable int configId) {
 		return services.getConfig(configId);

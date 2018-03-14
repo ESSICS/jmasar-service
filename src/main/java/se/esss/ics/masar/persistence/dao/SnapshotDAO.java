@@ -45,6 +45,12 @@ public interface SnapshotDAO {
 	 */
 	public void deleteSnapshot(int snapshotId);
 	
-	public List<SnapshotPv> getSnapshotPvs(int snapshotId);
+	/**
+	 * Retrieve the PV values associated with the specified snapshot id. This will return data even
+	 * if the snapshot has not yet been committed.
+	 * @param snapshotId The snapshot database id
+	 * @return
+	 */
+	public <T> List<SnapshotPv<T>> getSnapshotPvValues(int snapshotId);
 	
 }

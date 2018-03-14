@@ -104,7 +104,7 @@ public class SnapshotJdbcDAO implements SnapshotDAO {
 	
 	@Override
 	@SuppressWarnings("rawtypes")
-	public List<SnapshotPv> getSnapshotPvs(int snapshotId){
+	public List<SnapshotPv> getSnapshotPvValues(int snapshotId){
 		return jdbcTemplate.query("select * from snapshot_pv where snapshot_id=?",
 				new Object[] {snapshotId},
 				new SnapshotPvRowMapper(objectMapper));
@@ -121,11 +121,11 @@ public class SnapshotJdbcDAO implements SnapshotDAO {
 					new Object[] {snapshotId}, 
 					new SnapshotRowMapper());
 		} catch (DataAccessException e) {
-			// No snapshot corresponding to snapshotId found.
+			// No committed snapshot corresponding to snapshotId found
 			return null;
 		}
 		
-		snapshot.setSnapshotPvList(getSnapshotPvs(snapshotId));
+		snapshot.setSnapshotPvList(getSnapshotPvValues(snapshotId));
 		
 		return snapshot;
 		

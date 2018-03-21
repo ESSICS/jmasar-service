@@ -3,10 +3,14 @@ package se.esss.ics.masar.services;
 import java.util.List;
 
 import se.esss.ics.masar.model.config.Config;
+import se.esss.ics.masar.model.node.Node;
+import se.esss.ics.masar.model.node.NodeData;
 import se.esss.ics.masar.model.snapshot.Snapshot;
 import se.esss.ics.masar.model.snapshot.SnapshotPv;
 
 public interface IServices {
+	
+	public Node<Void> createNewFolder(Node<Void> node);
 	
 	public Config saveNewConfiguration(Config configuration);
 	

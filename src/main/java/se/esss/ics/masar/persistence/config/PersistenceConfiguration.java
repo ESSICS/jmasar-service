@@ -22,10 +22,6 @@ public class PersistenceConfiguration {
 	public HikariDataSource dataSource() {
 		HikariDataSource dataSource = (HikariDataSource) DataSourceBuilder.create().type(HikariDataSource.class)
 				.build();
-
-		// HikariConfig hikariConfig = new HikariConfig();
-		// hikariConfig.setJdbcUrl(environment.getProperty("spring.datasource.jdbcUrl"));
-		// HikariDataSource dataSource = new HikariDataSource(hikariConfig);
 		return dataSource;
 	}
 
@@ -80,6 +76,16 @@ public class PersistenceConfiguration {
 	@Bean
 	public ObjectMapper objectMapper() {
 		return new ObjectMapper();
+	}
+	
+	@Bean
+	public SimpleJdbcInsert nodeInsert() {
+		return new SimpleJdbcInsert(dataSource()).withTableName("node").usingGeneratedKeyColumns("id");
+	}
+	
+	@Bean
+	public SimpleJdbcInsert nodeClosureInsert() {
+		return new SimpleJdbcInsert(dataSource()).withTableName("node_closure");
 	}
 
 }

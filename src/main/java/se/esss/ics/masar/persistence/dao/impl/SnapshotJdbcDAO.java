@@ -42,8 +42,7 @@ public class SnapshotJdbcDAO implements SnapshotDAO {
 	public int savePreliminarySnapshot(Snapshot snapshot) {
 
 		Map<String, Object> params = new HashMap<String, Object>(2);
-		params.put("config_id", snapshot.getConfigId());
-		params.put("created", snapshot.getCreated());
+		//params.put("created", snapshot.getCreated());
 		
 		int snapshotId = snapshotInsert.executeAndReturnKey(params).intValue();
 		

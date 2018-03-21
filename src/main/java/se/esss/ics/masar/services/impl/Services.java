@@ -13,6 +13,8 @@ import se.esss.ics.masar.model.config.Config;
 import se.esss.ics.masar.model.config.ConfigPv;
 import se.esss.ics.masar.model.exception.ConfigNotFoundException;
 import se.esss.ics.masar.model.exception.SnapshotNotFoundException;
+import se.esss.ics.masar.model.node.Node;
+import se.esss.ics.masar.model.node.NodeData;
 import se.esss.ics.masar.model.snapshot.Snapshot;
 import se.esss.ics.masar.model.snapshot.SnapshotPv;
 import se.esss.ics.masar.persistence.dao.ConfigDAO;
@@ -35,7 +37,7 @@ public class Services implements IServices{
 	@Transactional
 	public Config saveNewConfiguration(Config config) {
 		
-		config.setCreated(new Date());
+		//config.setCreated(new Date());
 		
 		int configId = configDAO.saveConfig(config);
 		return configDAO.getConfig(configId);
@@ -68,8 +70,8 @@ public class Services implements IServices{
 		}
 		
 		Snapshot snapshot = new Snapshot();
-		snapshot.setCreated(new Date());
-		snapshot.setConfigId(configId);
+		//snapshot.setCreated(new Date());
+		
 		
 		List<SnapshotPv> snapshotPvs = new ArrayList<>();
 		
@@ -117,5 +119,21 @@ public class Services implements IServices{
 			throw new SnapshotNotFoundException("Snapshot with id=" + snapshotId  + " not found.");
 		}
 		return snapshot;
+	}
+	
+	@Override
+	public Node<Void> createNewFolder(Node<Void> node) {
+		
+		if(node.getParent() == null) {
+			throw new IllegalArgumentException("Cannot create new folder as parent folder is not specified.");
+		}
+		
+		if(node.getData() == null || 
+				node.getData() == null ||
+				node.getData().isEmpty()) {
+			throw new IllegalArgumentException("Insufficient data to create new folder.");
+		}
+	
+		return configDAO.createNewFolder(node);
 	}
 }

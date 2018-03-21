@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.ApiOperation;
 import se.esss.ics.masar.model.config.Config;
+import se.esss.ics.masar.model.node.Node;
+import se.esss.ics.masar.model.node.NodeData;
 import se.esss.ics.masar.model.snapshot.Snapshot;
 import se.esss.ics.masar.services.IServices;
 
@@ -20,6 +22,19 @@ public class ConfigurationController extends BaseController{
 	
 	@Autowired
 	private IServices services;
+	
+
+	/**
+	 * Create a new "folder" in the tree structure.
+	 * @param node A {@link Node} object describing the new node (folder). It's parent node must be non-null.
+	 * @return The node inserted into the tree.
+	 */
+	@ApiOperation(value = "Create a new folder", consumes = "application/json;charset=UTF-8")
+	@PutMapping("/folder")
+	public Node<Void> createNewFolder(@RequestBody final Node<Void> node) {
+		
+		return services.createNewFolder(node);
+	}
 
 	@ApiOperation(value = "Create a new configuration", consumes = "application/json;charset=UTF-8")
 	@PutMapping("/config")

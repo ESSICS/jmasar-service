@@ -24,4 +24,10 @@ public class BaseController {
       
         return new ResponseEntity<String>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
+	
+	@ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleSnapshotNotFoundException(HttpServletRequest req, IllegalArgumentException exception) {
+      
+        return new ResponseEntity<String>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 }

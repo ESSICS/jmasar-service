@@ -1,7 +1,6 @@
 package se.esss.ics.masar.services.impl;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,6 @@ import se.esss.ics.masar.model.config.ConfigPv;
 import se.esss.ics.masar.model.exception.ConfigNotFoundException;
 import se.esss.ics.masar.model.exception.SnapshotNotFoundException;
 import se.esss.ics.masar.model.node.Node;
-import se.esss.ics.masar.model.node.NodeData;
 import se.esss.ics.masar.model.snapshot.Snapshot;
 import se.esss.ics.masar.model.snapshot.SnapshotPv;
 import se.esss.ics.masar.persistence.dao.ConfigDAO;
@@ -35,12 +33,8 @@ public class Services implements IServices{
 	
 	@Override
 	@Transactional
-	public Config saveNewConfiguration(Config config) {
-		
-		//config.setCreated(new Date());
-		
-		int configId = configDAO.saveConfig(config);
-		return configDAO.getConfig(configId);
+	public Node createNewConfiguration(Config config) {
+		return configDAO.createNewConfiguration(config);
 	}
 
 	@Override
@@ -61,7 +55,7 @@ public class Services implements IServices{
 	@Override
 	@Transactional
 	@SuppressWarnings("rawtypes")
-	public int takeSnapshot(int configId) {
+	public Snapshot takeSnapshot(int configId) {
 		
 		Config config = configDAO.getConfig(configId);
 		
@@ -69,11 +63,11 @@ public class Services implements IServices{
 			throw new ConfigNotFoundException("Cannot take snapshot for config with id=" + configId  + " as it does not exist.");
 		}
 		
-		Snapshot snapshot = new Snapshot();
-		//snapshot.setCreated(new Date());
+		Snapshot snapshot = Snapshot.builder()
+				.configId(configId)
+				.build();
 		
-		
-		List<SnapshotPv> snapshotPvs = new ArrayList<>();
+		List<SnapshotPv<?>> snapshotPvs = new ArrayList<>();
 		
 		for(ConfigPv configPv : config.getConfigPvList()) {
 			try {
@@ -86,12 +80,12 @@ public class Services implements IServices{
 		
 		snapshot.setSnapshotPvList(snapshotPvs);
 		
-		return snapshotDAO.savePreliminarySnapshot(snapshot);
+		return configDAO.savePreliminarySnapshot(snapshot);
 	
 	}
 	
 	@Override
-	public <T> List<SnapshotPv<T>> getSnapshotPvValues(int snapshotId){
+	public List<SnapshotPv<?>> getSnapshotPvValues(int snapshotId){
 		return snapshotDAO.getSnapshotPvValues(snapshotId);
 	}
 	
@@ -122,18 +116,23 @@ public class Services implements IServices{
 	}
 	
 	@Override
-	public Node<Void> createNewFolder(Node<Void> node) {
+	public Node createNewFolder(Node node) {
 		
 		if(node.getParent() == null) {
 			throw new IllegalArgumentException("Cannot create new folder as parent folder is not specified.");
 		}
-		
-		if(node.getData() == null || 
-				node.getData() == null ||
-				node.getData().isEmpty()) {
-			throw new IllegalArgumentException("Insufficient data to create new folder.");
-		}
 	
 		return configDAO.createNewFolder(node);
+	}
+	
+	@Override
+	public Node getNode(int nodeId) {
+		
+		Node node = configDAO.getNode(nodeId);
+		if(node == null) {
+			throw new IllegalArgumentException("No node found with id=" + nodeId);
+		}
+		
+		return node;
 	}
 }

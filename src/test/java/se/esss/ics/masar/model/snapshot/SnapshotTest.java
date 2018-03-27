@@ -14,9 +14,9 @@ public class SnapshotTest {
 		Date now = new Date();
 		
 		Snapshot snapshot = Snapshot.builder()
-				.created(now)
-				.id(77)
-				.build();
+			.created(now)
+			.id(77)
+			.build();
 		
 		assertFalse(snapshot.isApprove());
 		assertEquals(77,  snapshot.getId());
@@ -24,12 +24,12 @@ public class SnapshotTest {
 		assertNull(snapshot.getUserName());
 		
 		snapshot = Snapshot.builder()
-				.approve(true)
-				.comment("comment")
-				.userName("userName")
-				.created(now)
-				.id(77)
-				.build();
+		.approve(true)
+		.comment("comment")
+		.userName("userName")
+		.created(now)
+		.id(77)
+		.build();
 		
 		assertTrue(snapshot.isApprove());
 		assertEquals(77,  snapshot.getId());
@@ -63,10 +63,10 @@ public class SnapshotTest {
 		Date now = new Date();
 		
 		Snapshot snapshot = Snapshot.builder()
-				.created(now)
-				.id(77)
-				.snapshotPvList(Arrays.asList(snapshotPv))
-				.build();
+		.created(now)
+		.id(77)
+		.snapshotPvList(Arrays.asList(snapshotPv))
+		.build();
 		
 		assertFalse(snapshot.isApprove());
 		assertEquals(77,  snapshot.getId());

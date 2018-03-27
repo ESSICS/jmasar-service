@@ -67,15 +67,15 @@ public class SnapshotControllerTest {
 				.build();
 
 		configFromClient = Config.builder().active(true).configPvList(Arrays.asList(configPv))
-				.description("description").name("configName").system("system").build();
+				.description("description").system("system").build();
 
-		config1 = Config.builder().active(true).id(1).configPvList(Arrays.asList(configPv)).created(new Date())
-				.description("description").name("configName").system("system").build();
+		config1 = Config.builder().active(true).configPvList(Arrays.asList(configPv))
+				.description("description").system("system").build();
 
 		snapshotPv = SnapshotPv.builder().dtype(1).fetchStatus(true).severity(0).status(1).time(1000L)
 				.timens(777).value(new Double(7.7)).build();
 
-		snapshot = Snapshot.builder().approve(true).comment("comment").configId(1).created(new Date())
+		snapshot = Snapshot.builder().approve(true).comment("comment")
 				.snapshotPvList(Arrays.asList(snapshotPv)).build();
 //
 //		when(services.saveNewConfiguration(configFromClient)).thenReturn(config1);
@@ -86,7 +86,7 @@ public class SnapshotControllerTest {
 	@Test
 	public void testTakeSnapshot() throws Exception{
 		
-		when(services.takeSnapshot(1)).thenReturn(7);
+		when(services.takeSnapshot(1)).thenReturn(null);
 		
 		MockHttpServletRequestBuilder request = put("/snapshot/1");
 

@@ -1,58 +1,24 @@
 package se.esss.ics.masar.model.snapshot;
 
+import java.util.Date;
 import java.util.List;
 
-import se.esss.ics.masar.model.node.NodeData;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 
-public class Snapshot extends NodeData{
+@Builder
+@AllArgsConstructor
+@Data
+public class Snapshot{
 	
+	private Date created;
+	private int id;
+	private int configId;
 	private boolean approve;
 	private String userName;
-	private int username_id;
+	private int usernameId;
 	private String comment;
 	
-	@SuppressWarnings("rawtypes")
-	private List<SnapshotPv> snapshotPvList;
-
-	public boolean isApprove() {
-		return approve;
-	}
-
-	public void setApprove(boolean approve) {
-		this.approve = approve;
-	}
-
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-
-	public int getUsername_id() {
-		return username_id;
-	}
-
-	public void setUsername_id(int username_id) {
-		this.username_id = username_id;
-	}
-
-	public String getComment() {
-		return comment;
-	}
-
-	public void setComment(String comment) {
-		this.comment = comment;
-	}
-
-	public List<SnapshotPv> getSnapshotPvList() {
-		return snapshotPvList;
-	}
-
-	public void setSnapshotPvList(List<SnapshotPv> snapshotPvList) {
-		this.snapshotPvList = snapshotPvList;
-	}
-	
-	
+	private List<SnapshotPv<?>> snapshotPvList;
 }

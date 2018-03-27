@@ -24,7 +24,7 @@ public class SnapshotController extends BaseController {
 
 	@ApiOperation(value = "Take a snapshot, i.e. save preliminary.")
 	@PutMapping("/snapshot/{configId}")
-	public int takeSnapshot(@PathVariable int configId) {
+	public Snapshot takeSnapshot(@PathVariable int configId) {
 		return services.takeSnapshot(configId);
 	}
 

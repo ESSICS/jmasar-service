@@ -29,7 +29,7 @@ public class PersistenceConfiguration {
 	public SimpleJdbcInsert configurationInsert() {
 		DataSource dataSource = dataSource();
 
-		return new SimpleJdbcInsert(dataSource).withTableName("config").usingGeneratedKeyColumns("id");
+		return new SimpleJdbcInsert(dataSource).withTableName("config");
 	}
 
 	@Bean
@@ -57,7 +57,7 @@ public class PersistenceConfiguration {
 	public SimpleJdbcInsert snapshotPvInsert() {
 		DataSource dataSource = dataSource();
 
-		return new SimpleJdbcInsert(dataSource).withTableName("snapshot_pv").usingGeneratedKeyColumns("id");
+		return new SimpleJdbcInsert(dataSource).withTableName("snapshot_pv");
 	}
 
 	@Bean

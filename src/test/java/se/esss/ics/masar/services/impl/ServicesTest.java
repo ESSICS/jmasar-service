@@ -19,6 +19,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import se.esss.ics.masar.model.config.Config;
 import se.esss.ics.masar.model.config.ConfigPv;
 import se.esss.ics.masar.model.exception.ConfigNotFoundException;
+import se.esss.ics.masar.model.node.Node;
 import se.esss.ics.masar.model.snapshot.Snapshot;
 import se.esss.ics.masar.model.snapshot.SnapshotPv;
 import se.esss.ics.masar.persistence.dao.ConfigDAO;
@@ -59,21 +60,21 @@ public class ServicesTest {
 				.active(true)
 				.configPvList(Arrays.asList(configPv))
 				.description("description")
-				.name("configName")
+
 				.system("system")
 				.build();
 		
 		config1 = Config.builder()
 				.active(true)
-				.id(1)
+	
 				.configPvList(Arrays.asList(configPv))
-				.created(new Date())
+	
 				.description("description")
-				.name("configName")
+			
 				.system("system")
 				.build();
 		
-		when(configDAO.saveConfig(configFromClient)).thenReturn(1);
+		//when(configDAO.createNewConfiguration(configFromClient)).thenReturn(1);
 		when(configDAO.getConfig(1)).thenReturn(config1);
 		when(configDAO.getConfig(2)).thenReturn(null);
 		
@@ -89,20 +90,14 @@ public class ServicesTest {
 				.value(new Double(7.7))
 				.build();
 		
-		 snapshot1 = Snapshot.builder()
-				.approve(true)
-				.comment("comment")
-				.configId(1)
-				.created(new Date())
-				.snapshotPvList(Arrays.asList(snapshotPv))
-				.build();
+		 
 	}
 	
 	
 	@Test
 	public void testSaveNewSnapshot() {
 		
-		Config config = services.saveNewConfiguration(configFromClient);
+		Node config = services.createNewConfiguration(configFromClient);
 		
 		assertEquals(1, config.getId());
 		assertNotNull(config.getCreated());

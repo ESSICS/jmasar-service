@@ -1,16 +1,13 @@
 package se.esss.ics.masar.persistence.dao.impl;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import se.esss.ics.masar.model.snapshot.Snapshot;
@@ -37,37 +34,7 @@ public class SnapshotJdbcDAO implements SnapshotDAO {
 	private static final int NO_USER = -1;
 	
 	
-	@Override
-	@SuppressWarnings("rawtypes")
-	public int savePreliminarySnapshot(Snapshot snapshot) {
-
-		Map<String, Object> params = new HashMap<String, Object>(2);
-		//params.put("created", snapshot.getCreated());
-		
-		int snapshotId = snapshotInsert.executeAndReturnKey(params).intValue();
-		
-		params = new HashMap<String, Object>(8);
-		params.put("snapshot_id", snapshotId);
-		for(SnapshotPv snapshotPv : snapshot.getSnapshotPvList()) {
-			params.put("dtype", snapshotPv.getDtype());
-			params.put("severity", snapshotPv.getSeverity());
-			params.put("status", snapshotPv.getStatus());
-			params.put("time", snapshotPv.getTime());
-			params.put("timens", snapshotPv.getTimens());
-			params.put("clazz", snapshotPv.getValue().getClass().getCanonicalName());
-			try {
-				params.put("value", objectMapper.writeValueAsString(snapshotPv.getValue()));
-			} catch (JsonProcessingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			params.put("fetch_status", snapshotPv.isFetchStatus());
-			
-			snapshotPvInsert.execute(params);
-		}
 	
-		return snapshotId;
-	}
 	
 	@Override
 	public void commitSnapshot(int snapshotId, String userName, String comment) {
@@ -102,8 +69,7 @@ public class SnapshotJdbcDAO implements SnapshotDAO {
 	}
 	
 	@Override
-	@SuppressWarnings("rawtypes")
-	public List<SnapshotPv> getSnapshotPvValues(int snapshotId){
+	public List<SnapshotPv<?>> getSnapshotPvValues(int snapshotId){
 		return jdbcTemplate.query("select * from snapshot_pv where snapshot_id=?",
 				new Object[] {snapshotId},
 				new SnapshotPvRowMapper(objectMapper));

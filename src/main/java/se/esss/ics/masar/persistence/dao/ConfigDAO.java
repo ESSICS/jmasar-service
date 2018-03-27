@@ -5,14 +5,14 @@ import java.util.List;
 import se.esss.ics.masar.model.config.Config;
 import se.esss.ics.masar.model.config.ConfigPv;
 import se.esss.ics.masar.model.node.Node;
-import se.esss.ics.masar.model.node.NodeData;
+import se.esss.ics.masar.model.snapshot.Snapshot;
 
 
 public interface ConfigDAO {
 	
-	public Node<Void> createNewFolder(Node<Void> node);
+	public Node createNewFolder(Node node);
 	
-	public int saveConfig(Config config);
+	public Node createNewConfiguration(Config config);
 	
 	public List<Config> getConfigs();
 	
@@ -20,6 +20,16 @@ public interface ConfigDAO {
 	
 	public List<ConfigPv> getConfigPvs(int configId);
 	
-	public <T> List<T> getChildNodes(int nodeId);
+	public List<Node> getChildNodes(Node node);
+	
+	/**
+	 * Saves a snapshot to the database as a preliminary snapshot, i.e. without user id and comment.
+	 * @param snapshot The {@link Snapshot} object to save together with the data read from the PVs
+	 * @return The database id of the new snapshot.
+	 */
+	public Snapshot savePreliminarySnapshot(Snapshot snapshot);
+	
+	public Node getNode(int nodeId);
+
 		
 }

@@ -6,18 +6,20 @@ import java.util.List;
 
 import se.esss.ics.masar.model.NodeType;
 
-public class Node<T> {
+public class Node {
+
+	private List<Node> children = new ArrayList<Node>();
+	private Node parent;
+	private int id;
+	private String name;
+	private Date created;
+	private Date lastModified;
+	private NodeType nodeType = NodeType.FOLDER;
 	
-	private List<Node<T>> children = new ArrayList<Node<T>>();
-    private Node<T> parent;
-    private T data = null;
-    private int id;
-    private String name;
-    private Date created;
-    private Date lastModified;
-    private NodeType nodeType = NodeType.FOLDER;
-    
-    public String getName() {
+	public Node() {
+	}
+
+	public String getName() {
 		return name;
 	}
 
@@ -25,25 +27,13 @@ public class Node<T> {
 		this.name = name;
 	}
 
-	public Node() {
-    }
-    
-    public Node(T data) {
-        this.data = data;
-    }
-
-    public Node(T data, Node<T> parent) {
-        this.data = data;
-        this.parent = parent;
-    }
-  
-    public NodeType getNodeType() {
+	public NodeType getNodeType() {
 		return nodeType;
 	}
-    
-    public void setNodeType(NodeType nodeType) {
-    		this.nodeType = nodeType;
-    }
+
+	public void setNodeType(NodeType nodeType) {
+		this.nodeType = nodeType;
+	}
 
 	public int getId() {
 		return id;
@@ -69,31 +59,19 @@ public class Node<T> {
 		this.lastModified = lastModified;
 	}
 
-	public void setChildren(List<Node<T>> children) {
+	public void setChildren(List<Node> children) {
 		this.children = children;
 	}
 
-    public List<Node<T>> getChildren() {
-        return children;
-    }
+	public List<Node> getChildren() {
+		return children;
+	}
 
-    public void setParent(Node<T> parent) {
-        this.parent = parent;
-    }
-    
-    public Node<T> getParent(){
-    		return parent;
-    }
+	public void setParent(Node parent) {
+		this.parent = parent;
+	}
 
-    public T getData() {
-        return this.data;
-    }
-
-    public void setData(T data) {
-        this.data = data;
-    }
-
-    public void removeParent() {
-        this.parent = null;
-    }
+	public Node getParent() {
+		return parent;
+	}
 }

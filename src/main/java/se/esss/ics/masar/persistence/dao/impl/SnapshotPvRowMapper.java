@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import se.esss.ics.masar.model.snapshot.SnapshotPv;
 
 @SuppressWarnings("rawtypes")
-public class SnapshotPvRowMapper implements RowMapper<SnapshotPv> {
+public class SnapshotPvRowMapper implements RowMapper<SnapshotPv<?>> {
 	
 	private ObjectMapper objectMapper;
 	
@@ -19,7 +19,7 @@ public class SnapshotPvRowMapper implements RowMapper<SnapshotPv> {
 	}
 
 	@Override
-	public SnapshotPv mapRow(ResultSet resultSet, int rowIndex) throws SQLException {
+	public SnapshotPv<?> mapRow(ResultSet resultSet, int rowIndex) throws SQLException {
 		
 		return SnapshotPv.builder()
 				.dtype(resultSet.getInt("dtype"))

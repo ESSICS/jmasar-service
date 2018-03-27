@@ -17,10 +17,7 @@ public class ConfigTest {
 	public void testConfig() {
 		Date now = new Date();
 		Config config = Config.builder()
-				.created(now)
 				.description("description")
-				.id(1)
-				.name("name")
 				.system("system")
 				.build();
 		
@@ -33,10 +30,7 @@ public class ConfigTest {
 		
 		config = Config.builder()
 				.active(false)
-				.created(now)
 				.description("description")
-				.id(1)
-				.name("name")
 				.build();
 		
 		assertFalse(config.isActive());
@@ -65,10 +59,7 @@ public class ConfigTest {
 		
 		Date now = new Date();
 		Config config = Config.builder()
-				.created(now)
 				.description("description")
-				.id(1)
-				.name("name")
 				.system("system")
 				.configPvList(Arrays.asList(configPv))
 				.build();

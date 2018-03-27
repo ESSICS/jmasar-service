@@ -7,7 +7,7 @@ CREATE FUNCTION update_updated_at_column() RETURNS trigger
   END;
 $$;
 
-CREATE TYPE node_type AS ENUM ('FOLDER', 'CONFIGURATION', 'SNAPSHOT');
+CREATE TYPE node_type AS ENUM ('FOLDER', 'CONFIGURATION');
 
 CREATE TABLE IF NOT EXISTS node(
   id SERIAL PRIMARY KEY,
@@ -60,17 +60,18 @@ CREATE TABLE IF NOT EXISTS username(
 );
 
 CREATE TABLE IF NOT EXISTS snapshot (
-  node_id INTEGER REFERENCES node(id) ON DELETE CASCADE,
+  id SERIAL PRIMARY KEY,
+  config_id INTEGER REFERENCES node(id) ON DELETE CASCADE,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   username_id INTEGER REFERENCES username(id) ON DELETE CASCADE,
   comment TEXT,
   approve BOOLEAN
 );
 
-CREATE INDEX IF NOT EXISTS snapshot_config_idx ON snapshot(node_id);
+CREATE INDEX IF NOT EXISTS snapshot_config_idx ON snapshot(config_id);
 
 CREATE TABLE IF NOT EXISTS snapshot_pv (
-  id SERIAL PRIMARY KEY,
-  node_id INTEGER REFERENCES node(id) ON DELETE CASCADE NOT NULL,
+  snapshot_id INTEGER REFERENCES snapshot(id) ON DELETE CASCADE NOT NULL,
   dtype INTEGER NOT NULL,
   severity INTEGER NOT NULL,
   status INTEGER NOT NULL,
@@ -82,4 +83,4 @@ CREATE TABLE IF NOT EXISTS snapshot_pv (
 );
 
 CREATE INDEX IF NOT EXISTS username_idx ON username(name);
-CREATE INDEX IF NOT EXISTS snapshot_pv_idx ON snapshot_pv(node_id);
+CREATE INDEX IF NOT EXISTS snapshot_pv_idx ON snapshot_pv(snapshot_id);

@@ -8,13 +8,7 @@ import se.esss.ics.masar.model.snapshot.SnapshotPv;
 
 public interface SnapshotDAO {
 
-	/**
-	 * Saves a snapshot to the database as a preliminary snapshot, i.e. without user id and comment.
-	 * @param snapshot The {@link Snapshot} object to save together with the data read from the PVs
-	 * @return The database id of the new snapshot.
-	 */
-	public int savePreliminarySnapshot(Snapshot snapshot);
-	
+		
 	/**
 	 * Get snapshots for the specified configuration id.
 	 * @param configId The database id of the configuration see {@link Config#getId()}
@@ -51,6 +45,6 @@ public interface SnapshotDAO {
 	 * @param snapshotId The snapshot database id
 	 * @return
 	 */
-	public <T> List<SnapshotPv<T>> getSnapshotPvValues(int snapshotId);
+	public List<SnapshotPv<?>> getSnapshotPvValues(int snapshotId);
 	
 }

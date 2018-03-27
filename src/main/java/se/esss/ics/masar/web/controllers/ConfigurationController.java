@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.ApiOperation;
 import se.esss.ics.masar.model.config.Config;
 import se.esss.ics.masar.model.node.Node;
-import se.esss.ics.masar.model.node.NodeData;
 import se.esss.ics.masar.model.snapshot.Snapshot;
+import se.esss.ics.masar.persistence.dao.ConfigDAO;
 import se.esss.ics.masar.services.IServices;
 
 
@@ -31,16 +31,23 @@ public class ConfigurationController extends BaseController{
 	 */
 	@ApiOperation(value = "Create a new folder", consumes = "application/json;charset=UTF-8")
 	@PutMapping("/folder")
-	public Node<Void> createNewFolder(@RequestBody final Node<Void> node) {
+	public Node createNewFolder(@RequestBody final Node node) {
 		
 		return services.createNewFolder(node);
 	}
 
 	@ApiOperation(value = "Create a new configuration", consumes = "application/json;charset=UTF-8")
 	@PutMapping("/config")
-	public Config saveNewConfiguration(@RequestBody final Config configuration) {
+	public Node saveNewConfiguration(@RequestBody final Config configuration) {
 		
-		return services.saveNewConfiguration(configuration);
+		return services.createNewConfiguration(configuration);
+	}
+	
+	@ApiOperation(value = "Get a node including its child nodes", consumes = "application/json;charset=UTF-8")
+	@GetMapping("/node/{nodeId}")
+	public Node getNode(@PathVariable final int nodeId) {
+		
+		return services.getNode(nodeId);
 	}
 	
 	@ApiOperation(value = "Get all configurations", consumes = "application/json;charset=UTF-8")

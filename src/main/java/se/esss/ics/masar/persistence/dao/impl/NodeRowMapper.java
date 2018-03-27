@@ -8,12 +8,11 @@ import org.springframework.jdbc.core.RowMapper;
 import se.esss.ics.masar.model.NodeType;
 import se.esss.ics.masar.model.config.Config;
 import se.esss.ics.masar.model.node.Node;
-import se.esss.ics.masar.model.snapshot.Snapshot;
 
-public class NodeRowMapper<T> implements RowMapper<Node<T>>{
+public class NodeRowMapper implements RowMapper<Node>{
 
 	@Override
-	public Node<T> mapRow(ResultSet resultSet, int rowIndex) throws SQLException {
+	public Node mapRow(ResultSet resultSet, int rowIndex) throws SQLException {
 		
 		NodeType nodeType = NodeType.valueOf(resultSet.getString("type"));
 		
@@ -21,18 +20,15 @@ public class NodeRowMapper<T> implements RowMapper<Node<T>>{
 		
 		switch(nodeType) {
 			case FOLDER:
-				node = new Node<String>(resultSet.getString("name"));
+				node = new Node();
 				break;
 			case CONFIGURATION:
-				node = new Node<Config>();
-				break;
-			case SNAPSHOT:
-				node = new Node<Snapshot>();
+				node = new Config();
 				break;
 			default:
 				return null;
 		}
-
+		node.setName(resultSet.getString("name"));
 		node.setCreated(resultSet.getDate("created"));
 		node.setLastModified(resultSet.getDate("last_modified"));
 		node.setNodeType(NodeType.valueOf(resultSet.getString("type")));

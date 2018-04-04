@@ -8,5 +8,8 @@
 **/target/*
 **/bin/*
 
-#Mac OS stuff
+# Mac OS stuff
 **/.DS_Store
+
+# Files created by H2 database
+db/*

@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import org.junit.Before;
@@ -25,11 +24,12 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import se.esss.ics.masar.model.config.Config;
-import se.esss.ics.masar.model.config.ConfigPv;
+import se.esss.ics.masar.model.Config;
+import se.esss.ics.masar.model.ConfigPv;
+import se.esss.ics.masar.model.Node;
+import se.esss.ics.masar.model.Snapshot;
+import se.esss.ics.masar.model.SnapshotPv;
 import se.esss.ics.masar.model.exception.ConfigNotFoundException;
-import se.esss.ics.masar.model.snapshot.Snapshot;
-import se.esss.ics.masar.model.snapshot.SnapshotPv;
 import se.esss.ics.masar.services.IServices;
 import se.esss.ics.masar.web.config.ControllersTestConfig;
 
@@ -44,6 +44,8 @@ public class ConfigurationControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
+	
+	private Node nodeFromClient;
 
 	private Config configFromClient;
 
@@ -74,12 +76,51 @@ public class ConfigurationControllerTest {
 				.snapshotPvList(Arrays.asList(snapshotPv)).build();
 
 		when(services.createNewConfiguration(configFromClient)).thenReturn(config1);
-		when(services.getConfigs()).thenReturn(Arrays.asList(config1));
 		when(services.getConfig(1)).thenReturn(config1);
+		
+		Node parentNode = new Node();
+		parentNode.setName("Parent");
+		parentNode.setId(1);
+		
+		nodeFromClient = new Node();
+		nodeFromClient.setId(77);
+		nodeFromClient.setName("Folder");
+		nodeFromClient.setParent(parentNode);
+		
+		when(services.createNewFolder(nodeFromClient)).thenReturn(nodeFromClient);
+		when(services.getNode(nodeFromClient.getId())).thenReturn(nodeFromClient);
+	}
+	
+	@Test
+	public void testCreateFolder() throws Exception {
+
+
+		MockHttpServletRequestBuilder request = put("/folder").contentType(JSON)
+				.content(objectMapper.writeValueAsString(nodeFromClient));
+
+		MvcResult result = mockMvc.perform(request).andExpect(status().isOk()).andExpect(content().contentType(JSON))
+				.andReturn();
+
+		// Make sure response contains expected data
+		objectMapper.readValue(result.getResponse().getContentAsString(), Node.class);
+
+	}
+	
+	@Test
+	public void testGetNode() throws Exception {
+
+		MockHttpServletRequestBuilder request = get("/node/" + nodeFromClient.getId());
+
+		MvcResult result = mockMvc.perform(request).andExpect(status().isOk()).andExpect(content().contentType(JSON))
+				.andReturn();
+
+		// Make sure response contains expected data
+		objectMapper.readValue(result.getResponse().getContentAsString(), Node.class);
+
 	}
 
 	@Test
-	public void testSaveConfig() throws Exception {
+	public void testCreateConfig() throws Exception {
 
 		MockHttpServletRequestBuilder request = put("/config").contentType(JSON)
 				.content(objectMapper.writeValueAsString(configFromClient));
@@ -89,19 +130,6 @@ public class ConfigurationControllerTest {
 
 		// Make sure response contains expected data
 		objectMapper.readValue(result.getResponse().getContentAsString(), Config.class);
-
-	}
-
-	@Test
-	public void testGetConfigs() throws Exception {
-		MockHttpServletRequestBuilder request = get("/config").contentType(JSON);
-
-		MvcResult result = mockMvc.perform(request).andExpect(status().isOk()).andExpect(content().contentType(JSON))
-				.andReturn();
-
-		// Make sure response contains expected data
-		objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<List<Config>>() {
-		});
 
 	}
 

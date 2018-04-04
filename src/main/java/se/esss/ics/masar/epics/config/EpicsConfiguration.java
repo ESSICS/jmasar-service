@@ -9,7 +9,6 @@ public class EpicsConfiguration {
 	
 	@Bean
 	public PvaClient pvaClient() {
-		PvaClient pvaClient = PvaClient.get("pva ca");
-		return pvaClient;
+		return PvaClient.get("pva ca");
 	}
 }

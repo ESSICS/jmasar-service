@@ -5,7 +5,7 @@ import java.sql.SQLException;
 
 import org.springframework.jdbc.core.RowMapper;
 
-import se.esss.ics.masar.model.config.Config;
+import se.esss.ics.masar.model.Config;
 
 public class ConfigRowMapper implements RowMapper<Config> {
 
@@ -17,6 +17,12 @@ public class ConfigRowMapper implements RowMapper<Config> {
 				.active(resultSet.getBoolean("active"))
 				.description(resultSet.getString("description"))
 				.build();
+		
+		config.setId(resultSet.getInt("id"));
+		config.setName(resultSet.getString("name"));
+		config.setCreated(resultSet.getTimestamp("created"));
+		config.setLastModified(resultSet.getTimestamp("last_modified"));
+		
 		return config;
 	}
 }

@@ -1,7 +1,5 @@
 package se.esss.ics.masar.web.controllers;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,8 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.ApiOperation;
-import se.esss.ics.masar.model.snapshot.Snapshot;
-import se.esss.ics.masar.model.snapshot.SnapshotPv;
+import se.esss.ics.masar.model.Snapshot;
 import se.esss.ics.masar.services.IServices;
 
 @RestController
@@ -25,16 +22,12 @@ public class SnapshotController extends BaseController {
 	@ApiOperation(value = "Take a snapshot, i.e. save preliminary.")
 	@PutMapping("/snapshot/{configId}")
 	public Snapshot takeSnapshot(@PathVariable int configId) {
-		return services.takeSnapshot(configId);
+		Snapshot snapshot = services.takeSnapshot(configId);
+		
+		return snapshot;
 	}
 
-	@ApiOperation(value = "Retrieve snapshot values")
-	@GetMapping("/snapshot/{snapshotId}/values")
-	public <T> List<SnapshotPv<T>> getSnapshotPvs(@PathVariable int snapshotId) {
-		return services.getSnapshotPvValues(snapshotId);
-	}
-
-	@ApiOperation(value = "Get a snapshot", consumes = "application/json;charset=UTF-8")
+	@ApiOperation(value = "Get a snapshot, including its values.", consumes = "application/json;charset=UTF-8")
 	@GetMapping("/snapshot/{snapshotId}")
 	public Snapshot getSnapshot(@PathVariable int snapshotId) {
 

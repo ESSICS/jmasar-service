@@ -2,23 +2,19 @@ package se.esss.ics.masar.persistence.dao;
 
 import java.util.List;
 
-import se.esss.ics.masar.model.config.Config;
-import se.esss.ics.masar.model.config.ConfigPv;
-import se.esss.ics.masar.model.node.Node;
-import se.esss.ics.masar.model.snapshot.Snapshot;
+import se.esss.ics.masar.model.Config;
+import se.esss.ics.masar.model.ConfigPv;
+import se.esss.ics.masar.model.Node;
+import se.esss.ics.masar.model.Snapshot;
 
 
 public interface ConfigDAO {
 	
 	public Node createNewFolder(Node node);
 	
-	public Node createNewConfiguration(Config config);
-	
-	public List<Config> getConfigs();
+	public Config createNewConfiguration(Config config);
 	
 	public Config getConfig(int configId);
-	
-	public List<ConfigPv> getConfigPvs(int configId);
 	
 	public List<Node> getChildNodes(Node node);
 	
@@ -29,6 +25,12 @@ public interface ConfigDAO {
 	 */
 	public Snapshot savePreliminarySnapshot(Snapshot snapshot);
 	
+	/**
+	 * Retrieves a {@link Node} identified by the database id.
+	 * @param nodeId
+	 * @return A {@link Node} object including child nodes. If the id is a configuration node, a {@link Config}
+	 * object is returned instead, including the list of {@link ConfigPv}s.
+	 */
 	public Node getNode(int nodeId);
 
 		

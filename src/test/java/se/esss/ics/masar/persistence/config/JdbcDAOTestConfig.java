@@ -17,7 +17,7 @@ import se.esss.ics.masar.persistence.dao.impl.ConfigJdbcDAO;
 import se.esss.ics.masar.persistence.dao.impl.SnapshotJdbcDAO;
 
 @Configuration
-public class PersistenceTestConfig {
+public class JdbcDAOTestConfig {
 
 
 	@Bean
@@ -30,19 +30,34 @@ public class PersistenceTestConfig {
 	public SnapshotDAO snapshotDAO() {
 		return new SnapshotJdbcDAO();
 	}
-
 	
-	@Bean("flyway")
-	public Flyway flyway() {
-		Flyway flyway = new Flyway();
-		
-		flyway.setDataSource("jdbc:h2:nio:./db/h2.db", "", "");
-		flyway.setLocations("db/migration/h2");
-		flyway.setIgnoreFailedFutureMigration(false);
-		flyway.setIgnoreFailedFutureMigration(true);
-		flyway.setValidateOnMigrate(true);
-		flyway.setOutOfOrder(false);
-		
-		return flyway;
+	@Bean
+	public JdbcTemplate jdbcTemplate() {
+		return Mockito.mock(JdbcTemplate.class);
+	}
+	
+	@Bean
+	public SimpleJdbcInsert configurationEntryRelationInsert() {
+		return Mockito.mock(SimpleJdbcInsert.class);
+	}
+	
+	@Bean
+	public SimpleJdbcInsert configurationInsert() {
+		return Mockito.mock(SimpleJdbcInsert.class);
+	}
+
+	@Bean
+	public SimpleJdbcInsert configurationEntryInsert() {
+		return Mockito.mock(SimpleJdbcInsert.class);
+	}
+	
+	@Bean
+	public SimpleJdbcInsert snapshotPvInsert() {
+		return Mockito.mock(SimpleJdbcInsert.class);
+	}
+
+	@Bean
+	public ObjectMapper objectMapper() {
+		return new ObjectMapper();
 	}
 }

@@ -29,44 +29,68 @@ import org.epics.pvdata.pv.PVField;
 import org.epics.pvdata.pv.PVStructure;
 
 import se.esss.ics.masar.epics.exception.PVConversionException;
-import se.esss.ics.masar.model.snapshot.SnapshotPv;
+import se.esss.ics.masar.model.ConfigPv;
+import se.esss.ics.masar.model.SnapshotPv;
 
 public class SnapshotPvFactory {
+	
+	private SnapshotPvFactory() {
+		
+	}
+	
 
-	@SuppressWarnings("rawtypes")
-	public static <T> SnapshotPv<T> createSnapshotPv(PVStructure pvStructure) {
+	public static <T> SnapshotPv<T> createSnapshotPv(ConfigPv configPv, PVStructure pvStructure){
+		
+		verifyRequiredFields(pvStructure);
+		
+		PVField valueField = pvStructure.getSubField("value");
 
-		SnapshotPv snapshotPv = null;
-
-		for (PVField pvField : pvStructure.getPVFields()) {
-
-			String fieldName = pvField.getFieldName();
-
-			if ("value".equals(fieldName)) {
-				snapshotPv = getSnapshot(pvField);
-				snapshotPv.setDtype(getDtype(pvField));
-				break;
-			}
-		}
-
-		for (PVField pvField : pvStructure.getPVFields()) {
-
-			String fieldName = pvField.getFieldName();
-			if ("alarm".equals(fieldName)) {
-				snapshotPv = setAlarm(snapshotPv, pvField);
-			} else if ("timeStamp".equals(fieldName)) {
-				snapshotPv = setTimestamp(snapshotPv, pvField);
-			}
-		}
+		SnapshotPv snapshotPv = getSnapshot(valueField);
+		snapshotPv.setConfigPv(configPv);
+		
+		PVStructure alarmField = (PVStructure)pvStructure.getSubField("alarm");
+		snapshotPv.setSeverity(((BasePVInt)alarmField.getSubField("severity")).get());
+		snapshotPv.setStatus(((BasePVInt)alarmField.getSubField("status")).get());
+		
+		PVStructure timeStampField = (PVStructure)pvStructure.getSubField("timeStamp");
+		snapshotPv.setTime(((BasePVLong)timeStampField.getSubField("secondsPastEpoch")).get());
+		snapshotPv.setTimens(((BasePVInt)timeStampField.getSubField("nanoseconds")).get());
 
 		// PV successfully read and transformed
 		snapshotPv.setFetchStatus(true);
 
 		return snapshotPv;
 	}
+	
+	protected static void verifyRequiredFields(PVStructure pvStructure){
+		
+		if(pvStructure.getSubField("value") == null) {
+			throw new PVConversionException("Value field missingin PV data");
+		}
+		
+		PVStructure alarmStructure = (PVStructure)pvStructure.getSubField("alarm");
+		
+		if(alarmStructure == null) {
+			throw new PVConversionException("Alarm field missing in PV data");
+		}
+		
+		if(alarmStructure.getSubField("severity") == null || alarmStructure.getSubField("status") == null) {
+			throw new PVConversionException("One or more alarm sub-fields missing in PV data");
+		}
+		
+		PVStructure timestampStructure = (PVStructure)pvStructure.getSubField("timeStamp");
+		
+		if(timestampStructure == null) {
+			throw new PVConversionException("Timestamp field missing in PV data");
+		}
+	
+		if(timestampStructure.getSubField("secondsPastEpoch") == null || timestampStructure.getSubField("nanoseconds") == null) {
+			throw new PVConversionException("One or more timeStamp sub-fields missing in PV data");
+		}
+	}
 
 	@SuppressWarnings("rawtypes")
-	private static SnapshotPv getSnapshot(PVField pvField) {
+	private static SnapshotPv getSnapshot(PVField pvField){
 
 		if (pvField instanceof BasePVDouble) {
 			BasePVDouble fieldValue = (BasePVDouble) pvField;
@@ -221,39 +245,4 @@ public class SnapshotPvFactory {
 		// TODO determine how to set the dtype field from the PVField type
 		return 0;
 	}
-
-	private static SnapshotPv setAlarm(SnapshotPv snapshotPv, PVField pvField) {
-
-		for (PVField field : ((PVStructure) pvField).getPVFields()) {
-			String fieldName = field.getFieldName();
-
-			if ("severity".equals(fieldName)) {
-				BasePVInt basePvInt = (BasePVInt) field;
-				snapshotPv.setSeverity(basePvInt.get());
-			} else if ("status".equals(fieldName)) {
-				BasePVInt basePvInt = (BasePVInt) field;
-				snapshotPv.setStatus(basePvInt.get());
-			}
-		}
-
-		return snapshotPv;
-	}
-
-	private static SnapshotPv setTimestamp(SnapshotPv snapshotPv, PVField pvField) {
-
-		for (PVField field : ((PVStructure) pvField).getPVFields()) {
-			String fieldName = field.getFieldName();
-
-			if ("secondsPastEpoch".equals(fieldName)) {
-				BasePVLong basePvLong = (BasePVLong) field;
-				snapshotPv.setTime(basePvLong.get());
-			} else if ("nanoseconds".equals(fieldName)) {
-				BasePVInt basePvInt = (BasePVInt) field;
-				snapshotPv.setTimens(basePvInt.get());
-			}
-		}
-
-		return snapshotPv;
-	}
-
 }

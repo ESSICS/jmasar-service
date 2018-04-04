@@ -20,9 +20,8 @@ public class PersistenceConfiguration {
 	@Bean
 	@ConfigurationProperties(prefix = "spring.datasource")
 	public HikariDataSource dataSource() {
-		HikariDataSource dataSource = (HikariDataSource) DataSourceBuilder.create().type(HikariDataSource.class)
+		return (HikariDataSource) DataSourceBuilder.create().type(HikariDataSource.class)
 				.build();
-		return dataSource;
 	}
 
 	@Bean

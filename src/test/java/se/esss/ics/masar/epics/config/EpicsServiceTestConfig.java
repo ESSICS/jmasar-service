@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import se.esss.ics.masar.epics.IEpicsService;
+import se.esss.ics.masar.epics.exception.PVReadException;
 import se.esss.ics.masar.epics.impl.EpicsService;
 
 import static org.mockito.Mockito.*;

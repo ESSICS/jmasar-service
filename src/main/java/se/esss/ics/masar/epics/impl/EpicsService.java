@@ -3,12 +3,14 @@ package se.esss.ics.masar.epics.impl;
 import org.epics.pvaClient.PvaClient;
 import org.epics.pvaClient.PvaClientGetData;
 import org.epics.pvdata.pv.PVStructure;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import se.esss.ics.masar.epics.IEpicsService;
 import se.esss.ics.masar.epics.exception.PVReadException;
 import se.esss.ics.masar.epics.util.SnapshotPvFactory;
-import se.esss.ics.masar.model.snapshot.SnapshotPv;
+import se.esss.ics.masar.model.ConfigPv;
+import se.esss.ics.masar.model.SnapshotPv;
 
 public class EpicsService implements IEpicsService {
 
@@ -16,28 +18,16 @@ public class EpicsService implements IEpicsService {
 	private PvaClient pvaClient;
 
 	@Override
-	public <T> SnapshotPv<T> getPv(String pvName) throws PVReadException{
+	public <T> SnapshotPv<T> getPv(ConfigPv configPv) throws PVReadException {
 
-		if (pvaClient == null)
-			pvaClient = PvaClient.get("pva ca");
-
+		PvaClientGetData pvaClientGetData;
 		try {
-			PvaClientGetData pvaClientGetData = pvaClient.channel(pvName, "ca", 2.0).get().getData();
+			pvaClientGetData = pvaClient.channel(configPv.getPvName(), "ca", 2.0).get().getData();
 			PVStructure myPVStructure = pvaClientGetData.getPVStructure();
-			
-			return SnapshotPvFactory.createSnapshotPv(myPVStructure);
-		} catch (Exception e) {
-			throw new PVReadException("Unable to read PV " + pvName);
-		}
+			return SnapshotPvFactory.createSnapshotPv(configPv, myPVStructure);
+		} catch (Exception e1) {
+			LoggerFactory.getLogger(EpicsService.class).error(e1.getMessage());
+			return SnapshotPv.<T>builder().fetchStatus(false).configPv(configPv).build();
+		}		
 	}
-	
-	public static void main(String[] args) {
-		try {
-			new EpicsService().getPv("georgweiss:OUT1:TEMP");
-		} catch (PVReadException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
 }

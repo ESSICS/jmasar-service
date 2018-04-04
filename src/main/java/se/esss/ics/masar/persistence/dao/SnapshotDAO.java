@@ -2,9 +2,8 @@ package se.esss.ics.masar.persistence.dao;
 
 import java.util.List;
 
-import se.esss.ics.masar.model.config.Config;
-import se.esss.ics.masar.model.snapshot.Snapshot;
-import se.esss.ics.masar.model.snapshot.SnapshotPv;
+import se.esss.ics.masar.model.Config;
+import se.esss.ics.masar.model.Snapshot;
 
 public interface SnapshotDAO {
 
@@ -39,12 +38,5 @@ public interface SnapshotDAO {
 	 */
 	public void deleteSnapshot(int snapshotId);
 	
-	/**
-	 * Retrieve the PV values associated with the specified snapshot id. This will return data even
-	 * if the snapshot has not yet been committed.
-	 * @param snapshotId The snapshot database id
-	 * @return
-	 */
-	public List<SnapshotPv<?>> getSnapshotPvValues(int snapshotId);
 	
 }

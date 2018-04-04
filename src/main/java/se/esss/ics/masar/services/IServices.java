@@ -2,10 +2,9 @@ package se.esss.ics.masar.services;
 
 import java.util.List;
 
-import se.esss.ics.masar.model.config.Config;
-import se.esss.ics.masar.model.node.Node;
-import se.esss.ics.masar.model.snapshot.Snapshot;
-import se.esss.ics.masar.model.snapshot.SnapshotPv;
+import se.esss.ics.masar.model.Config;
+import se.esss.ics.masar.model.Node;
+import se.esss.ics.masar.model.Snapshot;
 
 public interface IServices {
 	
@@ -13,7 +12,7 @@ public interface IServices {
 	
 	public Node createNewConfiguration(Config configuration);
 	
-	public List<Config> getConfigs();
+	public Node getNode(int nodeId);
 	
 	public Config getConfig(int configId);
 	
@@ -24,10 +23,7 @@ public interface IServices {
 	public List<Snapshot> getSnapshots(int configId);
 	
 	public Snapshot getSnapshot(int snapshotId);
-	
-	public <T> List<SnapshotPv<T>> getSnapshotPvValues(int snapshotId);
-	
+		
 	public void deleteSnapshot(int snapshotId);
-	
-	public Node getNode(int nodeId);
+
 }

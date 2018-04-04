@@ -2,6 +2,8 @@ package se.esss.ics.masar.web.controllers;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,10 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.ApiOperation;
-import se.esss.ics.masar.model.config.Config;
-import se.esss.ics.masar.model.node.Node;
-import se.esss.ics.masar.model.snapshot.Snapshot;
-import se.esss.ics.masar.persistence.dao.ConfigDAO;
+import se.esss.ics.masar.model.Config;
+import se.esss.ics.masar.model.Node;
+import se.esss.ics.masar.model.Snapshot;
 import se.esss.ics.masar.services.IServices;
 
 
@@ -38,22 +39,16 @@ public class ConfigurationController extends BaseController{
 
 	@ApiOperation(value = "Create a new configuration", consumes = "application/json;charset=UTF-8")
 	@PutMapping("/config")
-	public Node saveNewConfiguration(@RequestBody final Config configuration) {
+	public Node saveNewConfiguration(@Valid @RequestBody final Config configuration) {
 		
 		return services.createNewConfiguration(configuration);
 	}
 	
-	@ApiOperation(value = "Get a node including its child nodes", consumes = "application/json;charset=UTF-8")
+	@ApiOperation(value = "Get a node including its child nodes, or get a config inlcuding PVs")
 	@GetMapping("/node/{nodeId}")
 	public Node getNode(@PathVariable final int nodeId) {
 		
 		return services.getNode(nodeId);
-	}
-	
-	@ApiOperation(value = "Get all configurations", consumes = "application/json;charset=UTF-8")
-	@GetMapping("/config")
-	public List<Config> getConfigurations() {
-		return services.getConfigs();
 	}
 	
 	@ApiOperation(value = "Get PVs from config id", consumes = "application/json;charset=UTF-8")

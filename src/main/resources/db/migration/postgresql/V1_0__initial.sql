@@ -72,6 +72,7 @@ CREATE INDEX IF NOT EXISTS snapshot_config_idx ON snapshot(config_id);
 
 CREATE TABLE IF NOT EXISTS snapshot_pv (
   snapshot_id INTEGER REFERENCES snapshot(id) ON DELETE CASCADE NOT NULL,
+  config_pv_id INTEGER REFERENCES config_pv(id) ON DELETE CASCADE NOT NULL,
   dtype INTEGER NOT NULL,
   severity INTEGER NOT NULL,
   status INTEGER NOT NULL,

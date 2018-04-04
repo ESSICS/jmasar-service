@@ -1,4 +1,4 @@
-package se.esss.ics.masar.model.snapshot;
+package se.esss.ics.masar.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SnapshotPv<T> {
 
-	private int id;
+	private int snapshotId;
 	private int dtype;
 	private int severity;
 	private int status;
@@ -19,4 +19,5 @@ public class SnapshotPv<T> {
 	private int timens;
 	private T value;
 	private boolean fetchStatus;
+	private ConfigPv configPv;
 }

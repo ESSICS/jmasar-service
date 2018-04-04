@@ -10,17 +10,11 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import se.esss.ics.masar.model.snapshot.Snapshot;
-import se.esss.ics.masar.model.snapshot.SnapshotPv;
+import se.esss.ics.masar.model.Snapshot;
+import se.esss.ics.masar.model.SnapshotPv;
 import se.esss.ics.masar.persistence.dao.SnapshotDAO;
 
 public class SnapshotJdbcDAO implements SnapshotDAO {
-
-	@Autowired
-	private SimpleJdbcInsert snapshotInsert;
-	
-	@Autowired
-	private SimpleJdbcInsert snapshotPvInsert;
 	
 	@Autowired 
 	private SimpleJdbcInsert userNameInsert;
@@ -34,8 +28,6 @@ public class SnapshotJdbcDAO implements SnapshotDAO {
 	private static final int NO_USER = -1;
 	
 	
-	
-	
 	@Override
 	public void commitSnapshot(int snapshotId, String userName, String comment) {
 		
@@ -45,7 +37,7 @@ public class SnapshotJdbcDAO implements SnapshotDAO {
 		}
 		
 		jdbcTemplate.update("update snapshot set username_id=?, comment=? where id=?",
-				new Object[] {userId, comment, snapshotId});
+				userId, comment, snapshotId);
 	}
 	
 	private int getUserNameId(String userName) {
@@ -60,21 +52,11 @@ public class SnapshotJdbcDAO implements SnapshotDAO {
 	
 	@Override
 	public List<Snapshot> getSnapshots(int configId){
-		List<Snapshot> snapshots = jdbcTemplate.query("select snapshot.id, config_id, username_id, created, comment, approve, name from snapshot join " +
+		return jdbcTemplate.query("select snapshot.id, config_id, username_id, created, comment, approve, name from snapshot join " +
 				"username on snapshot.username_id=username.id where snapshot.config_id=?", 
 				new Object[] {configId}, 
 				new SnapshotRowMapper());
-		
-		return snapshots;
 	}
-	
-	@Override
-	public List<SnapshotPv<?>> getSnapshotPvValues(int snapshotId){
-		return jdbcTemplate.query("select * from snapshot_pv where snapshot_id=?",
-				new Object[] {snapshotId},
-				new SnapshotPvRowMapper(objectMapper));
-	}
-	
 	
 	@Override
 	public Snapshot getSnapshot(int snapshotId) {
@@ -90,7 +72,12 @@ public class SnapshotJdbcDAO implements SnapshotDAO {
 			return null;
 		}
 		
-		snapshot.setSnapshotPvList(getSnapshotPvValues(snapshotId));
+		List<SnapshotPv<?>> snapshotValues = 
+				jdbcTemplate.query("select * from snapshot_pv join config_pv on snapshot_pv.config_pv_id=config_pv.id where snapshot_id=?",
+				new Object[] {snapshotId},
+				new SnapshotPvRowMapper(objectMapper));
+		
+		snapshot.setSnapshotPvList(snapshotValues);
 		
 		return snapshot;
 		
@@ -98,6 +85,6 @@ public class SnapshotJdbcDAO implements SnapshotDAO {
 	
 	@Override
 	public void deleteSnapshot(int snapshotId) {
-		jdbcTemplate.update("delete from snapshot where id=?", new Object[] {snapshotId});
+		jdbcTemplate.update("delete from snapshot where id=?", snapshotId);
 	}
 }

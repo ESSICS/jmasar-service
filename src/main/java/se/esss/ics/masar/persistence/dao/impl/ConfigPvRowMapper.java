@@ -5,7 +5,7 @@ import java.sql.SQLException;
 
 import org.springframework.jdbc.core.RowMapper;
 
-import se.esss.ics.masar.model.config.ConfigPv;
+import se.esss.ics.masar.model.ConfigPv;
 
 
 public class ConfigPvRowMapper implements RowMapper<ConfigPv> {

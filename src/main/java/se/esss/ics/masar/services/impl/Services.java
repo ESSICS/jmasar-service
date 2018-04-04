@@ -3,18 +3,20 @@ package se.esss.ics.masar.services.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import se.esss.ics.masar.epics.IEpicsService;
 import se.esss.ics.masar.epics.exception.PVReadException;
-import se.esss.ics.masar.model.config.Config;
-import se.esss.ics.masar.model.config.ConfigPv;
+import se.esss.ics.masar.model.Config;
+import se.esss.ics.masar.model.ConfigPv;
+import se.esss.ics.masar.model.Node;
+import se.esss.ics.masar.model.Snapshot;
+import se.esss.ics.masar.model.SnapshotPv;
 import se.esss.ics.masar.model.exception.ConfigNotFoundException;
 import se.esss.ics.masar.model.exception.SnapshotNotFoundException;
-import se.esss.ics.masar.model.node.Node;
-import se.esss.ics.masar.model.snapshot.Snapshot;
-import se.esss.ics.masar.model.snapshot.SnapshotPv;
 import se.esss.ics.masar.persistence.dao.ConfigDAO;
 import se.esss.ics.masar.persistence.dao.SnapshotDAO;
 import se.esss.ics.masar.services.IServices;
@@ -31,16 +33,14 @@ public class Services implements IServices{
 	@Autowired
 	private IEpicsService epicsService;
 	
+	private Logger logger = LoggerFactory.getLogger(Services.class.getName());
+	
 	@Override
 	@Transactional
 	public Node createNewConfiguration(Config config) {
 		return configDAO.createNewConfiguration(config);
 	}
 
-	@Override
-	public List<Config> getConfigs(){
-		return configDAO.getConfigs();
-	}
 	
 	@Override
 	public Config getConfig(int configId){
@@ -54,7 +54,6 @@ public class Services implements IServices{
 	
 	@Override
 	@Transactional
-	@SuppressWarnings("rawtypes")
 	public Snapshot takeSnapshot(int configId) {
 		
 		Config config = configDAO.getConfig(configId);
@@ -71,10 +70,9 @@ public class Services implements IServices{
 		
 		for(ConfigPv configPv : config.getConfigPvList()) {
 			try {
-				snapshotPvs.add(epicsService.getPv(configPv.getPvName()));
+				snapshotPvs.add(epicsService.getPv(configPv));
 			} catch (PVReadException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(e.getMessage());
 			}
 		}
 		
@@ -83,12 +81,7 @@ public class Services implements IServices{
 		return configDAO.savePreliminarySnapshot(snapshot);
 	
 	}
-	
-	@Override
-	public List<SnapshotPv<?>> getSnapshotPvValues(int snapshotId){
-		return snapshotDAO.getSnapshotPvValues(snapshotId);
-	}
-	
+		
 	@Override
 	public Snapshot commitSnapshot(int snapshotId, String userName, String comment) {
 		snapshotDAO.commitSnapshot(snapshotId, userName, comment);

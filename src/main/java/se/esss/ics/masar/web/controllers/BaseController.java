@@ -12,22 +12,31 @@ import se.esss.ics.masar.model.exception.SnapshotNotFoundException;
 
 @RestController
 public class BaseController {
-	
+
 	@ExceptionHandler(ConfigNotFoundException.class)
-    public ResponseEntity<String> handleConfigNotFoundException(HttpServletRequest req, ConfigNotFoundException exception) {
-      
-        return new ResponseEntity<String>(exception.getMessage(), HttpStatus.NOT_FOUND);
-    }
-	
+	public ResponseEntity<String> handleConfigNotFoundException(HttpServletRequest req,
+			ConfigNotFoundException exception) {
+
+		return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
+	}
+
 	@ExceptionHandler(SnapshotNotFoundException.class)
-    public ResponseEntity<String> handleSnapshotNotFoundException(HttpServletRequest req, SnapshotNotFoundException exception) {
-      
-        return new ResponseEntity<String>(exception.getMessage(), HttpStatus.NOT_FOUND);
-    }
-	
+	public ResponseEntity<String> handleSnapshotNotFoundException(HttpServletRequest req,
+			SnapshotNotFoundException exception) {
+
+		return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
+	}
+
 	@ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleSnapshotNotFoundException(HttpServletRequest req, IllegalArgumentException exception) {
-      
-        return new ResponseEntity<String>(exception.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+	public ResponseEntity<String> handleSnapshotNotFoundException(HttpServletRequest req,
+			IllegalArgumentException exception) {
+
+		return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(AssertionError.class)
+	public ResponseEntity<String> handleAssertionError(HttpServletRequest req, AssertionError error) {
+
+		return new ResponseEntity<>(error.getMessage(), HttpStatus.BAD_REQUEST);
+	}
 }

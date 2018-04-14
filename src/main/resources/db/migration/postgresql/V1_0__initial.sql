@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS config_pv (
 
 CREATE TABLE IF NOT EXISTS config_pv_relation (
   config_id INTEGER REFERENCES node(id) ON DELETE CASCADE NOT NULL,
-  config_pv_id INTEGER REFERENCES config_pv(id) ON DELETE CASCADE NOT NULL
+  config_pv_id INTEGER REFERENCES config_pv(id) NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS config_pv_idx ON config_pv_relation(config_id, config_pv_id);
@@ -73,14 +73,14 @@ CREATE INDEX IF NOT EXISTS snapshot_config_idx ON snapshot(config_id);
 CREATE TABLE IF NOT EXISTS snapshot_pv (
   snapshot_id INTEGER REFERENCES snapshot(id) ON DELETE CASCADE NOT NULL,
   config_pv_id INTEGER REFERENCES config_pv(id) ON DELETE CASCADE NOT NULL,
-  dtype INTEGER NOT NULL,
-  severity INTEGER NOT NULL,
-  status INTEGER NOT NULL,
-  time BIGINT NOT NULL,
-  timens INTEGER NOT NULL,
-  clazz TEXT NOT NULL,
-  value TEXT NOT NULL DEFAULT '0',
-  fetch_status BOOLEAN
+  dtype INTEGER DEFAULT NULL,
+  severity INTEGER DEFAULT NULL,
+  status INTEGER DEFAULT NULL,
+  time BIGINT DEFAULT NULL,
+  timens INTEGER DEFAULT NULL,
+  clazz TEXT DEFAULT NULL,
+  value TEXT DEFAULT NULL,
+  fetch_status BOOLEAN DEFAULT FALSE
 );
 
 CREATE INDEX IF NOT EXISTS username_idx ON username(name);

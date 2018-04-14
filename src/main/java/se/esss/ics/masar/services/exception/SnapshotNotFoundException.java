@@ -1,4 +1,4 @@
-package se.esss.ics.masar.model.exception;
+package se.esss.ics.masar.services.exception;
 
 public class SnapshotNotFoundException extends RuntimeException {
 

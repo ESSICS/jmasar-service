@@ -22,9 +22,7 @@ public class SnapshotController extends BaseController {
 	@ApiOperation(value = "Take a snapshot, i.e. save preliminary.")
 	@PutMapping("/snapshot/{configId}")
 	public Snapshot takeSnapshot(@PathVariable int configId) {
-		Snapshot snapshot = services.takeSnapshot(configId);
-		
-		return snapshot;
+		return services.takeSnapshot(configId);
 	}
 
 	@ApiOperation(value = "Get a snapshot, including its values.", consumes = "application/json;charset=UTF-8")

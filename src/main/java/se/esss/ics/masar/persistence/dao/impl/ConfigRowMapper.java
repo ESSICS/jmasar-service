@@ -12,17 +12,16 @@ public class ConfigRowMapper implements RowMapper<Config> {
 	@Override
 	public Config mapRow(ResultSet resultSet, int rowIndex) throws SQLException {
 		
-		Config config = Config.builder()
+		return Config.builder()
 				.system(resultSet.getString("system"))
 				.active(resultSet.getBoolean("active"))
 				.description(resultSet.getString("description"))
+				.id(resultSet.getInt("id"))
+				.name(resultSet.getString("name"))
+				.created(resultSet.getTimestamp("created"))
+				.lastModified(resultSet.getTimestamp("last_modified"))
 				.build();
 		
-		config.setId(resultSet.getInt("id"));
-		config.setName(resultSet.getString("name"));
-		config.setCreated(resultSet.getTimestamp("created"));
-		config.setLastModified(resultSet.getTimestamp("last_modified"));
 		
-		return config;
 	}
 }

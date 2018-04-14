@@ -12,20 +12,21 @@ import se.esss.ics.masar.epics.IEpicsService;
 import se.esss.ics.masar.epics.exception.PVReadException;
 import se.esss.ics.masar.model.Config;
 import se.esss.ics.masar.model.ConfigPv;
-import se.esss.ics.masar.model.Node;
+import se.esss.ics.masar.model.Folder;
 import se.esss.ics.masar.model.Snapshot;
 import se.esss.ics.masar.model.SnapshotPv;
-import se.esss.ics.masar.model.exception.ConfigNotFoundException;
-import se.esss.ics.masar.model.exception.SnapshotNotFoundException;
 import se.esss.ics.masar.persistence.dao.ConfigDAO;
 import se.esss.ics.masar.persistence.dao.SnapshotDAO;
 import se.esss.ics.masar.services.IServices;
+import se.esss.ics.masar.services.exception.ConfigNotFoundException;
+import se.esss.ics.masar.services.exception.SnapshotNotFoundException;
 
 
 public class Services implements IServices{
 
 	@Autowired
 	private ConfigDAO configDAO;
+	
 	
 	@Autowired
 	private SnapshotDAO snapshotDAO;
@@ -37,34 +38,31 @@ public class Services implements IServices{
 	
 	@Override
 	@Transactional
-	public Node createNewConfiguration(Config config) {
-		return configDAO.createNewConfiguration(config);
+	public Config createNewConfiguration(Config config) {
+		
+		if(config.getParent() == null) {
+			throw new IllegalArgumentException("Parent of configuration not specified");
+		}
+		return configDAO.createConfiguration(config);
 	}
-
 	
 	@Override
-	public Config getConfig(int configId){
-		Config config = configDAO.getConfig(configId);
-		if(config == null) {
-			throw new ConfigNotFoundException("Config with id=" + configId  + " not found.");
-		}
+	public Config getConfiguration(int nodeId) {
 		
-		return config;
+		return configDAO.getConfiguration(nodeId);
 	}
 	
 	@Override
 	@Transactional
 	public Snapshot takeSnapshot(int configId) {
 		
-		Config config = configDAO.getConfig(configId);
+		Config config = configDAO.getConfiguration(configId);
 		
 		if(config == null) {
 			throw new ConfigNotFoundException("Cannot take snapshot for config with id=" + configId  + " as it does not exist.");
 		}
 		
-		Snapshot snapshot = Snapshot.builder()
-				.configId(configId)
-				.build();
+	
 		
 		List<SnapshotPv<?>> snapshotPvs = new ArrayList<>();
 		
@@ -76,7 +74,10 @@ public class Services implements IServices{
 			}
 		}
 		
-		snapshot.setSnapshotPvList(snapshotPvs);
+		Snapshot snapshot = Snapshot.builder()
+				.configId(configId)
+				.snapshotPvList(snapshotPvs)
+				.build();
 		
 		return configDAO.savePreliminarySnapshot(snapshot);
 	
@@ -109,23 +110,36 @@ public class Services implements IServices{
 	}
 	
 	@Override
-	public Node createNewFolder(Node node) {
+	public Folder createFolder(Folder folder) {
 		
-		if(node.getParent() == null) {
+		if(folder.getParent() == null) {
 			throw new IllegalArgumentException("Cannot create new folder as parent folder is not specified.");
 		}
 	
-		return configDAO.createNewFolder(node);
+		return configDAO.createFolder(folder);
 	}
 	
 	@Override
-	public Node getNode(int nodeId) {
-		
-		Node node = configDAO.getNode(nodeId);
-		if(node == null) {
-			throw new IllegalArgumentException("No node found with id=" + nodeId);
-		}
-		
-		return node;
+	public Folder getFolder(int nodeId) {
+		return  configDAO.getFolder(nodeId);
+	}
+	
+	
+	@Override
+	@Transactional
+	public void deleteConfiguration(int nodeId) {
+		configDAO.deleteConfiguration(nodeId);
+	}
+	
+	@Override
+	@Transactional
+	public Folder moveNode(int nodeId, int targetNodeId) {
+		return configDAO.moveNode(nodeId, targetNodeId);
+	}
+	
+	@Override
+	@Transactional
+	public void deleteFolder(int nodeId) {
+		configDAO.deleteFolder(nodeId);
 	}
 }

@@ -29,8 +29,8 @@ import se.esss.ics.masar.model.Config;
 import se.esss.ics.masar.model.ConfigPv;
 import se.esss.ics.masar.model.Snapshot;
 import se.esss.ics.masar.model.SnapshotPv;
-import se.esss.ics.masar.model.exception.SnapshotNotFoundException;
 import se.esss.ics.masar.services.IServices;
+import se.esss.ics.masar.services.exception.SnapshotNotFoundException;
 import se.esss.ics.masar.web.config.ControllersTestConfig;
 
 @RunWith(SpringRunner.class)
@@ -77,7 +77,7 @@ public class SnapshotControllerTest {
 				.snapshotPvList(Arrays.asList(snapshotPv)).id(7).build();
 
 		when(services.createNewConfiguration(configFromClient)).thenReturn(config1);
-		when(services.getConfig(1)).thenReturn(config1);
+		when(services.getConfiguration(1)).thenReturn(config1);
 		//when(services.takeSnapshot(1)).thenReturn(snapshot);
 	}
 	

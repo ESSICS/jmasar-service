@@ -1,7 +1,10 @@
 package se.esss.ics.masar.web.controllers;
 
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -24,19 +27,30 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import se.esss.ics.masar.application.swagger.SwaggerConfig;
 import se.esss.ics.masar.model.Config;
 import se.esss.ics.masar.model.ConfigPv;
+import se.esss.ics.masar.model.Folder;
 import se.esss.ics.masar.model.Node;
 import se.esss.ics.masar.model.Snapshot;
 import se.esss.ics.masar.model.SnapshotPv;
-import se.esss.ics.masar.model.exception.ConfigNotFoundException;
 import se.esss.ics.masar.services.IServices;
+import se.esss.ics.masar.services.exception.ConfigNotFoundException;
 import se.esss.ics.masar.web.config.ControllersTestConfig;
+import springfox.documentation.spring.web.plugins.Docket;
 
 @RunWith(SpringRunner.class)
-@ContextHierarchy({ @ContextConfiguration(classes = { ControllersTestConfig.class }) })
+@ContextHierarchy({ @ContextConfiguration(classes = { ControllersTestConfig.class, SwaggerConfig.class }) })
 @WebMvcTest(ConfigurationController.class)
 
+/**
+ * Main purpose of the tests in this class is to verify that REST end points are
+ * maintained, i.e. that URLs are not changed and that they return the correct
+ * data.
+ * 
+ * @author Georg Weiss, European Spallation Source
+ *
+ */
 public class ConfigurationControllerTest {
 
 	@Autowired
@@ -45,9 +59,14 @@ public class ConfigurationControllerTest {
 	@Autowired
 	private MockMvc mockMvc;
 	
+	@Autowired
+	private Docket productApi;
+
 	private Node nodeFromClient;
 
 	private Config configFromClient;
+
+	private Folder folderFromClient;
 
 	private Config config1;
 
@@ -66,56 +85,47 @@ public class ConfigurationControllerTest {
 		configFromClient = Config.builder().active(true).configPvList(Arrays.asList(configPv))
 				.description("description").system("system").build();
 
-		config1 = Config.builder().active(true).configPvList(Arrays.asList(configPv))
-				.description("description").system("system").build();
+		config1 = Config.builder().active(true).configPvList(Arrays.asList(configPv)).description("description")
+				.system("system").build();
+
+		Node node = new Node();
+		node.setId(0);
+		folderFromClient = Folder.builder().name("SomeFolder").id(11).parent(node).build();
 
 		SnapshotPv snapshotPv = SnapshotPv.builder().dtype(1).fetchStatus(true).severity(0).status(1).time(1000L)
 				.timens(777).value(new Double(7.7)).build();
 
-		snapshot = Snapshot.builder().approve(true).comment("comment")
-				.snapshotPvList(Arrays.asList(snapshotPv)).build();
+		snapshot = Snapshot.builder().approve(true).comment("comment").snapshotPvList(Arrays.asList(snapshotPv))
+				.build();
 
 		when(services.createNewConfiguration(configFromClient)).thenReturn(config1);
-		when(services.getConfig(1)).thenReturn(config1);
-		
+		when(services.getConfiguration(1)).thenReturn(config1);
+
 		Node parentNode = new Node();
 		parentNode.setName("Parent");
 		parentNode.setId(1);
-		
+
 		nodeFromClient = new Node();
 		nodeFromClient.setId(77);
 		nodeFromClient.setName("Folder");
 		nodeFromClient.setParent(parentNode);
-		
-		when(services.createNewFolder(nodeFromClient)).thenReturn(nodeFromClient);
-		when(services.getNode(nodeFromClient.getId())).thenReturn(nodeFromClient);
+
+		when(services.createFolder(folderFromClient)).thenReturn(folderFromClient);
+
 	}
-	
+
 	@Test
 	public void testCreateFolder() throws Exception {
 
-
 		MockHttpServletRequestBuilder request = put("/folder").contentType(JSON)
-				.content(objectMapper.writeValueAsString(nodeFromClient));
+				.content(objectMapper.writeValueAsString(folderFromClient));
 
 		MvcResult result = mockMvc.perform(request).andExpect(status().isOk()).andExpect(content().contentType(JSON))
 				.andReturn();
 
+		String s = result.getResponse().getContentAsString();
 		// Make sure response contains expected data
-		objectMapper.readValue(result.getResponse().getContentAsString(), Node.class);
-
-	}
-	
-	@Test
-	public void testGetNode() throws Exception {
-
-		MockHttpServletRequestBuilder request = get("/node/" + nodeFromClient.getId());
-
-		MvcResult result = mockMvc.perform(request).andExpect(status().isOk()).andExpect(content().contentType(JSON))
-				.andReturn();
-
-		// Make sure response contains expected data
-		objectMapper.readValue(result.getResponse().getContentAsString(), Node.class);
+		objectMapper.readValue(s, Folder.class);
 
 	}
 
@@ -130,25 +140,12 @@ public class ConfigurationControllerTest {
 
 		// Make sure response contains expected data
 		objectMapper.readValue(result.getResponse().getContentAsString(), Config.class);
-
-	}
-
-	@Test
-	public void testGetConfig() throws Exception {
-		MockHttpServletRequestBuilder request = get("/config/1").contentType(JSON);
-
-		MvcResult result = mockMvc.perform(request).andExpect(status().isOk()).andExpect(content().contentType(JSON))
-				.andReturn();
-
-		// Make sure response contains expected data
-		objectMapper.readValue(result.getResponse().getContentAsString(), Config.class);
-
 	}
 
 	@Test
 	public void testGetNonExistingConfig() throws Exception {
 
-		when(services.getConfig(2)).thenThrow(new ConfigNotFoundException("lasdfk"));
+		when(services.getConfiguration(2)).thenThrow(new ConfigNotFoundException("lasdfk"));
 
 		MockHttpServletRequestBuilder request = get("/config/2").contentType(JSON);
 
@@ -169,7 +166,7 @@ public class ConfigurationControllerTest {
 		objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<List<Snapshot>>() {
 		});
 	}
-	
+
 	@Test
 	public void testGetSnapshotsForNonExistingConfig() throws Exception {
 
@@ -180,4 +177,71 @@ public class ConfigurationControllerTest {
 		mockMvc.perform(request).andExpect(status().isNotFound());
 	}
 
+	@Test
+	public void testDeleteConfiguration() throws Exception {
+		MockHttpServletRequestBuilder request = delete("/config/1");
+
+		mockMvc.perform(request).andExpect(status().isOk());
+	}
+
+	@Test
+	public void testDeleteFolder() throws Exception {
+		MockHttpServletRequestBuilder request = delete("/folder/1");
+
+		mockMvc.perform(request).andExpect(status().isOk());
+	}
+
+	@Test
+	public void testGetFolder() throws Exception {
+		when(services.getFolder(1)).thenReturn(Folder.builder().id(1).build());
+
+		MockHttpServletRequestBuilder request = get("/folder/1");
+
+		MvcResult result = mockMvc.perform(request).andExpect(status().isOk()).andExpect(content().contentType(JSON))
+				.andReturn();
+
+		// Make sure response contains expected data
+		objectMapper.readValue(result.getResponse().getContentAsString(), Folder.class);
+	}
+
+	@Test
+	public void testGetConfiguration() throws Exception {
+		when(services.getConfiguration(1)).thenReturn(Config.builder().build());
+
+		MockHttpServletRequestBuilder request = get("/config/1");
+
+		MvcResult result = mockMvc.perform(request).andExpect(status().isOk()).andExpect(content().contentType(JSON))
+				.andReturn();
+
+		// Make sure response contains expected data
+		objectMapper.readValue(result.getResponse().getContentAsString(), Config.class);
+	}
+
+	@Test
+	public void testMoveNode() throws Exception {
+		when(services.moveNode(1, 2)).thenReturn(Folder.builder().id(2).build());
+
+		MockHttpServletRequestBuilder request = post("/node/1").param("to", "2");
+
+		MvcResult result = mockMvc.perform(request).andExpect(status().isOk()).andExpect(content().contentType(JSON))
+				.andReturn();
+
+		// Make sure response contains expected data
+		objectMapper.readValue(result.getResponse().getContentAsString(), Folder.class);
+	}
+
+	@Test
+	public void testGetFolderIllegalArgument() throws Exception {
+		when(services.getFolder(666)).thenThrow(IllegalArgumentException.class);
+
+		MockHttpServletRequestBuilder request = get("/folder/666");
+
+		mockMvc.perform(request).andExpect(status().isBadRequest());
+
+	}
+	
+	@Test
+	public void verifySwaggerConfig() {
+		assertNotNull(productApi);
+	}
 }

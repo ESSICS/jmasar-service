@@ -7,11 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 
-import se.esss.ics.masar.model.exception.ConfigNotFoundException;
-import se.esss.ics.masar.model.exception.SnapshotNotFoundException;
+import se.esss.ics.masar.services.exception.ConfigNotFoundException;
+import se.esss.ics.masar.services.exception.SnapshotNotFoundException;
 
 @RestController
-public class BaseController {
+public abstract class BaseController {
 
 	@ExceptionHandler(ConfigNotFoundException.class)
 	public ResponseEntity<String> handleConfigNotFoundException(HttpServletRequest req,
@@ -26,17 +26,11 @@ public class BaseController {
 
 		return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
 	}
-
+	
 	@ExceptionHandler(IllegalArgumentException.class)
-	public ResponseEntity<String> handleSnapshotNotFoundException(HttpServletRequest req,
+	public ResponseEntity<String> handleIllegalArgumentException(HttpServletRequest req,
 			IllegalArgumentException exception) {
 
 		return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
-	}
-
-	@ExceptionHandler(AssertionError.class)
-	public ResponseEntity<String> handleAssertionError(HttpServletRequest req, AssertionError error) {
-
-		return new ResponseEntity<>(error.getMessage(), HttpStatus.BAD_REQUEST);
 	}
 }

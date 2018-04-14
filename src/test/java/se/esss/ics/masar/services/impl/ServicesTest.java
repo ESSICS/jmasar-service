@@ -30,14 +30,15 @@ import se.esss.ics.masar.epics.IEpicsService;
 import se.esss.ics.masar.epics.exception.PVReadException;
 import se.esss.ics.masar.model.Config;
 import se.esss.ics.masar.model.ConfigPv;
+import se.esss.ics.masar.model.Folder;
 import se.esss.ics.masar.model.Node;
 import se.esss.ics.masar.model.Snapshot;
 import se.esss.ics.masar.model.SnapshotPv;
-import se.esss.ics.masar.model.exception.ConfigNotFoundException;
 import se.esss.ics.masar.persistence.dao.ConfigDAO;
 import se.esss.ics.masar.persistence.dao.SnapshotDAO;
 import se.esss.ics.masar.services.IServices;
 import se.esss.ics.masar.services.config.ServicesTestConfig;
+import se.esss.ics.masar.services.exception.ConfigNotFoundException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextHierarchy({ @ContextConfiguration(classes = { ServicesTestConfig.class}) })
@@ -58,6 +59,8 @@ public class ServicesTest {
 	private Config configFromClient;
 	
 	private Config config1;
+	
+	private Config configWithParent;
 	
 	
 	@Before
@@ -90,32 +93,43 @@ public class ServicesTest {
 		
 		config1.setId(1);
 		
-		when(configDAO.createNewConfiguration(configFromClient)).thenReturn(configFromClient);
-		when(configDAO.getConfig(1)).thenReturn(config1);
-		when(configDAO.getNode(2)).thenReturn(null);
+		configWithParent = Config.builder()
+				.active(true)
+				.configPvList(Arrays.asList(configPv))
+				.description("description")
+				.system("system")
+				.parent(new Node())
+				.build();
+		
+		when(configDAO.createConfiguration(configFromClient)).thenReturn(configFromClient);
+		when(configDAO.createConfiguration(configWithParent)).thenReturn(configWithParent);
+	
 	}
 	
 	
+	@Test(expected = IllegalArgumentException.class)
+	public void testCreateConfigurationNoParent() {
+		services.createNewConfiguration(configFromClient);
+	}
+	
 	@Test
-	public void testSaveNewSnapshot() {
-		
-		Node config = services.createNewConfiguration(configFromClient);
-		
-		assertEquals(1, config.getId());
-		assertNotNull(config.getCreated());
+	public void testCreateConfiguration() {
+		services.createNewConfiguration(configWithParent);
 	}
 	
 	@Test
 	public void testGetConfigNotNull() {
 		
-		Config config = services.getConfig(1);
+		when(configDAO.getConfiguration(1)).thenReturn(configFromClient);
+		
+		Config config = services.getConfiguration(1);
 		assertEquals(1, config.getId());
 	}
 
 	
 	@Test
 	public void testTakeSnapshot() {
-		
+		when(configDAO.getConfiguration(1)).thenReturn(configFromClient);
 		services.takeSnapshot(1);
 	}
 	
@@ -149,7 +163,7 @@ public class ServicesTest {
 				.system("system")
 				.build();
 		
-		when(configDAO.getConfig(3)).thenReturn(config2);
+		when(configDAO.getConfiguration(3)).thenReturn(config2);
 		
 		when(epicsServices.getPv(any(ConfigPv.class))).thenAnswer(new Answer<SnapshotPv>() {
 			
@@ -244,47 +258,62 @@ public class ServicesTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void createNewFolderNoParentSpecified() {
 		
-		Node node = new Node();
+		Folder folderFromClient = Folder.builder().name("SomeFolder").build();
 		
-		services.createNewFolder(node);
+		services.createFolder(folderFromClient);
 	}
 	
 	@Test
 	public void testCreateNewFolder() {
 		
-		Node node = new Node();
-		node.setParent(new Node());
+		Folder folderFromClient = Folder.builder().name("SomeFolder").id(11)
+				.parent(Folder.builder().id(0).build()).build();
 		
-		services.createNewFolder(node);
+		services.createFolder(folderFromClient);
 		
-		verify(configDAO, atLeast(1)).createNewFolder(node);
-		
-		reset(configDAO);
-	}
-	
-	@Test(expected = IllegalArgumentException.class)
-	public void testGetNodeNoNodeFound() {
-		
-		when(configDAO.getNode(7777)).thenReturn(null);
-		
-		services.getNode(7777);
+		verify(configDAO, atLeast(1)).createFolder(folderFromClient);
 		
 		reset(configDAO);
 	}
 	
-
 	@Test
-	public void testGetNode() {
+	public void testGetFolder() {
+			
+		services.getFolder(1);
 		
-		Node node = new Node();
-		node.setId(7778);
-		
-		when(configDAO.getNode(7778)).thenReturn(node);
-		
-		Node node1 = services.getNode(7778);
-		
-		assertEquals(7778, node1.getId());
+		verify(configDAO, atLeast(1)).getFolder(1);
 		
 		reset(configDAO);
 	}
+	
+	@Test
+	public void testDeleteConfiguration() {
+			
+		services.deleteConfiguration(1);
+		
+		verify(configDAO, atLeast(1)).deleteConfiguration(1);
+		
+		reset(configDAO);
+	}
+	
+	@Test
+	public void testDeleteFolder() {
+			
+		services.deleteFolder(1);
+		
+		verify(configDAO, atLeast(1)).deleteFolder(1);
+		
+		reset(configDAO);
+	}
+	
+	@Test
+	public void testMoveNode() {
+			
+		services.moveNode(1, 2);
+		
+		verify(configDAO, atLeast(1)).moveNode(1, 2);
+		
+		reset(configDAO);
+	}
+	
 }

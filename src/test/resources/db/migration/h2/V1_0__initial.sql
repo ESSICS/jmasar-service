@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS config_pv (
 
 CREATE TABLE IF NOT EXISTS config_pv_relation (
   config_id INTEGER NOT NULL REFERENCES node(id) ON DELETE CASCADE,
-  config_pv_id INTEGER NOT NULL REFERENCES config_pv(id) ON DELETE CASCADE
+  config_pv_id INTEGER NOT NULL REFERENCES config_pv(id)
 );
 
 CREATE INDEX IF NOT EXISTS config_pv_idx ON config_pv_relation(config_id, config_pv_id);

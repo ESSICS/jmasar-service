@@ -11,14 +11,14 @@ public class SnapshotRowMapper implements RowMapper<Snapshot> {
 
 	@Override
 	public Snapshot mapRow(ResultSet resultSet, int rowIndex) throws SQLException {
-		
+			
 		return Snapshot.builder()
 				.approve(resultSet.getBoolean("approve"))
-				.comment(resultSet.getString("comment"))
 				.configId(resultSet.getInt("config_id"))
 				.created(resultSet.getTimestamp("created"))
 				.id(resultSet.getInt("id"))
 				.userName(resultSet.getString("name"))
+				.comment(resultSet.getString("comment"))
 				.build();
 	}
 }

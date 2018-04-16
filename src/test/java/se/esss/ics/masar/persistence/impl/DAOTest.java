@@ -372,10 +372,10 @@ public class DAOTest {
 				.snapshotPvList(Arrays.asList(snapshotPv)).build();
 
 		Snapshot newSnapshot = configDAO.savePreliminarySnapshot(snapshot);
-
+		
 		assertEquals(10, newSnapshot.getSnapshotPvList().get(0).getValue());
 
-		Snapshot fullSnapshot = snapshotDAO.getSnapshot(newSnapshot.getId());
+		Snapshot fullSnapshot = snapshotDAO.getSnapshot(newSnapshot.getId(), true);
 
 		assertNull(fullSnapshot);
 
@@ -385,7 +385,7 @@ public class DAOTest {
 
 		snapshotDAO.commitSnapshot(newSnapshot.getId(), "user", "comment");
 
-		fullSnapshot = snapshotDAO.getSnapshot(newSnapshot.getId());
+		fullSnapshot = snapshotDAO.getSnapshot(newSnapshot.getId(), true);
 
 		assertEquals(1, fullSnapshot.getSnapshotPvList().size());
 

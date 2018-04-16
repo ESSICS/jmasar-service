@@ -87,7 +87,7 @@ public class Services implements IServices{
 	public Snapshot commitSnapshot(int snapshotId, String userName, String comment) {
 		snapshotDAO.commitSnapshot(snapshotId, userName, comment);
 		
-		return snapshotDAO.getSnapshot(snapshotId);
+		return snapshotDAO.getSnapshot(snapshotId, true);
 	}
 	
 	@Override
@@ -102,7 +102,7 @@ public class Services implements IServices{
 	
 	@Override
 	public Snapshot getSnapshot(int snapshotId){
-		Snapshot snapshot = snapshotDAO.getSnapshot(snapshotId);
+		Snapshot snapshot = snapshotDAO.getSnapshot(snapshotId, true);
 		if(snapshot == null) {
 			throw new SnapshotNotFoundException("Snapshot with id=" + snapshotId  + " not found.");
 		}

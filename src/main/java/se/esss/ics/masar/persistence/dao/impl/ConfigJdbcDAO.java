@@ -24,12 +24,12 @@ import se.esss.ics.masar.model.NodeType;
 import se.esss.ics.masar.model.Snapshot;
 import se.esss.ics.masar.model.SnapshotPv;
 import se.esss.ics.masar.persistence.dao.ConfigDAO;
-import se.esss.ics.masar.web.controllers.SnapshotController;
+import se.esss.ics.masar.persistence.dao.SnapshotDAO;
 
 public class ConfigJdbcDAO implements ConfigDAO {
 	
 	@Autowired
-	private SnapshotController snapshotController;
+	private SnapshotDAO snapshotDAO;
 
 	@Autowired
 	private SimpleJdbcInsert configurationInsert;
@@ -300,7 +300,7 @@ public class ConfigJdbcDAO implements ConfigDAO {
 			snapshotPvInsert.execute(params);
 		}
 		
-		return snapshotController.getSnapshot(snapshotId);
+		return snapshotDAO.getSnapshot(snapshotId, false);
 
 	}
 

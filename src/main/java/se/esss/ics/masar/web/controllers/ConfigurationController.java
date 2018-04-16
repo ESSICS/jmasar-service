@@ -36,7 +36,6 @@ public class ConfigurationController extends BaseController{
 	@ApiOperation(value = "Create a new folder", consumes = "application/json;charset=UTF-8")
 	@PutMapping("/folder")
 	public Folder createFolder(@RequestBody final Folder folder) {
-		
 		return services.createFolder(folder);
 	}
 	

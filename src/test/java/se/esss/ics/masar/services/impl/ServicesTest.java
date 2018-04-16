@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.atLeast;
@@ -213,7 +214,7 @@ public class ServicesTest {
 		services.commitSnapshot(anyInt(), anyString(), anyString());
 		
 		verify(snapshotDAO, times(1)).commitSnapshot(anyInt(), anyString(), anyString());
-		verify(snapshotDAO, atLeast(1)).getSnapshot(anyInt());
+		verify(snapshotDAO, atLeast(1)).getSnapshot(anyInt(), anyBoolean());
 		
 		reset(snapshotDAO);
 	}
@@ -231,7 +232,7 @@ public class ServicesTest {
 	@Test
 	public void testGetSnapshotNotFound() {
 		
-		when(snapshotDAO.getSnapshot(77)).thenReturn(null);
+		when(snapshotDAO.getSnapshot(77, false)).thenReturn(null);
 		
 		try {
 			services.getSnapshot(77);
@@ -246,7 +247,7 @@ public class ServicesTest {
 	@Test
 	public void testGetSnapshot() {
 		
-		when(snapshotDAO.getSnapshot(177)).thenReturn(mock(Snapshot.class));
+		when(snapshotDAO.getSnapshot(177, true)).thenReturn(mock(Snapshot.class));
 		
 		Snapshot snapshot = services.getSnapshot(177);
 		

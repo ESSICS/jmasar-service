@@ -1,6 +1,7 @@
 package se.esss.ics.masar.web.controllers;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -82,7 +83,7 @@ public class ConfigurationControllerTest {
 		ConfigPv configPv = ConfigPv.builder().groupname("groupname").pvName("pvName").readonly(true).tags("tags")
 				.build();
 
-		configFromClient = Config.builder().active(true).configPvList(Arrays.asList(configPv))
+		configFromClient = Config.builder().id(10).active(true).configPvList(Arrays.asList(configPv))
 				.description("description").system("system").build();
 
 		config1 = Config.builder().active(true).configPvList(Arrays.asList(configPv)).description("description")
@@ -109,13 +110,12 @@ public class ConfigurationControllerTest {
 		nodeFromClient.setId(77);
 		nodeFromClient.setName("Folder");
 		nodeFromClient.setParent(parentNode);
-
-		when(services.createFolder(folderFromClient)).thenReturn(folderFromClient);
-
 	}
 
 	@Test
 	public void testCreateFolder() throws Exception {
+		
+		when(services.createFolder(folderFromClient)).thenReturn(folderFromClient);
 
 		MockHttpServletRequestBuilder request = put("/folder").contentType(JSON)
 				.content(objectMapper.writeValueAsString(folderFromClient));

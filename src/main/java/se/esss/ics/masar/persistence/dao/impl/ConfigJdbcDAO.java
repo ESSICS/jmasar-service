@@ -122,8 +122,8 @@ public class ConfigJdbcDAO implements ConfigDAO {
 		if (doesNameClash(node, childNodes)) {
 			throw new IllegalArgumentException("Node of same name and type already exists in parent node.");
 		}
-
-		Date now = new Date();
+	
+		Timestamp now = Timestamp.from(Instant.now());
 
 		Map<String, Object> params = new HashMap<>(2);
 		params.put("type", node.getNodeType().toString());
@@ -139,7 +139,7 @@ public class ConfigJdbcDAO implements ConfigDAO {
 				parent.getId(), newNodeId, newNodeId);
 
 		// Update the last modified date of the parent folder
-		jdbcTemplate.update("update node set last_modified=? where id=?", new Date(), parent.getId());
+		jdbcTemplate.update("update node set last_modified=? where id=?", Timestamp.from(Instant.now()), parent.getId());
 
 		return getNodeInternal(newNodeId);
 	}
@@ -266,7 +266,7 @@ public class ConfigJdbcDAO implements ConfigDAO {
 		jdbcTemplate.update("delete from node where id=?", nodeId);
 
 		// Update last modified date of the parent node
-		jdbcTemplate.update("update node set last_modified=? where id=?", new Date(), parentNode.getId());
+		jdbcTemplate.update("update node set last_modified=? where id=?", Timestamp.from(Instant.now()), parentNode.getId());
 	}
 
 	private void deleteOrphanedPVs(Collection<Integer> pvList) {
@@ -285,7 +285,7 @@ public class ConfigJdbcDAO implements ConfigDAO {
 
 		Map<String, Object> snapshotParams = new HashMap<>();
 		snapshotParams.put("config_id", snapshot.getConfigId());
-		snapshotParams.put("created", new Date());
+		snapshotParams.put("created", Timestamp.from(Instant.now()));
 
 		int snapshotId = snapshotInsert.executeAndReturnKey(snapshotParams).intValue();
 
@@ -341,7 +341,7 @@ public class ConfigJdbcDAO implements ConfigDAO {
 				+ "where supertree.descendant=? and subtree.ancestor=?", targetNodeId, nodeId);
 
 		// Update the last modified date of the source and target folder.
-		jdbcTemplate.update("update node set last_modified=? where id=? or id=?", new Date(), targetNodeId,
+		jdbcTemplate.update("update node set last_modified=? where id=? or id=?", Timestamp.from(Instant.now()), targetNodeId,
 				parentNodeId);
 
 		return getFolder(targetNodeId);

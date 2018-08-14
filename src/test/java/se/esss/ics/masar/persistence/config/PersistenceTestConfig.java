@@ -32,8 +32,6 @@ public class PersistenceTestConfig {
 		
 		flyway.setDataSource("jdbc:h2:nio:./db/h2.db", "", "");
 		flyway.setLocations("db/migration/h2");
-		flyway.setIgnoreFailedFutureMigration(false);
-		flyway.setIgnoreFailedFutureMigration(true);
 		flyway.setValidateOnMigrate(true);
 		flyway.setOutOfOrder(false);
 		

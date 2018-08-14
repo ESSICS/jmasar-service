@@ -14,7 +14,7 @@ import se.esss.ics.masar.persistence.dao.impl.SnapshotJdbcDAO;
 public class ServicesConfiguration {
 
 	@Bean
-	public ConfigDAO configurationDAO() {
+	public ConfigDAO configDAO() {
 		return new ConfigJdbcDAO();
 	}
 	

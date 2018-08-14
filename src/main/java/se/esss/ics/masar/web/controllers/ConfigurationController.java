@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.ApiOperation;
 import se.esss.ics.masar.model.Config;
 import se.esss.ics.masar.model.Folder;
+import se.esss.ics.masar.model.Node;
 import se.esss.ics.masar.model.Snapshot;
 import se.esss.ics.masar.services.IServices;
 
@@ -26,14 +27,13 @@ public class ConfigurationController extends BaseController{
 	
 	@Autowired
 	private IServices services;
-	
 
 	/**
-	 * Create a new "folder" in the tree structure.
+	 * Create a new folder in the tree structure.
 	 * @param node A {@link Folder} object. The name and parent fields must be non-null.
 	 * @return The folder inserted into the tree.
 	 */
-	@ApiOperation(value = "Create a new folder", consumes = "application/json;charset=UTF-8")
+	@ApiOperation(value = "Create a new folder", consumes = JSON, produces = JSON)
 	@PutMapping("/folder")
 	public Folder createFolder(@RequestBody final Folder folder) {
 		return services.createFolder(folder);
@@ -42,8 +42,7 @@ public class ConfigurationController extends BaseController{
 	@ApiOperation(value = "Delete a folder and its sub-tree")
 	@DeleteMapping("/folder/{nodeId}")
 	public void deleteFolder(@PathVariable final int nodeId) {
-		
-		 services.deleteFolder(nodeId);
+		 services.deleteNode(nodeId);
 	}
 	
 	/**
@@ -53,45 +52,60 @@ public class ConfigurationController extends BaseController{
 	 * existing folder. The returned object will contain existing child nodes as well as the parent node,
 	 * which is <code>null</code> for the root folder.
 	 */
-	@ApiOperation(value = "Get a folder and its child nodes", produces = "application/json;charset=UTF-8")
+	@ApiOperation(value = "Get a folder and its child nodes", produces = JSON)
 	@GetMapping("/folder/{nodeId}")
 	public Folder getFolder(@PathVariable final int nodeId) {
-		
 		return services.getFolder(nodeId);
 	}
 
-	@ApiOperation(value = "Create a new configuration", consumes = "application/json;charset=UTF-8")
+	@ApiOperation(value = "Create a new configuration", consumes = JSON)
 	@PutMapping("/config")
 	public Config saveConfiguration(@Valid @RequestBody final Config configuration) {
-		
 		return services.createNewConfiguration(configuration);
 	}
 	
-	@ApiOperation(value = "Get configuration and its list of PVs", produces = "application/json;charset=UTF-8")
+	@ApiOperation(value = "Get configuration and its list of PVs", produces = JSON)
 	@GetMapping("/config/{nodeId}")
 	public Config getConfiguration(@PathVariable final int nodeId) {
-		
 		return services.getConfiguration(nodeId);
+	}
+	
+	/**
+	 * Updates a configuration. For instance, user may change the name of the configuration or modify the list of PVs. NOTE: in case PVs are removed from
+	 * the configuration, the corresponding snapshot values are also deleted.
+	 * @param nodeId The node id of the configuration.
+	 * @param config The configuration object holding updated data (name, PV list...).
+	 * @return
+	 */
+	@ApiOperation(value = "Update configuration (e.g. modify PV list or rename configuration)", consumes = JSON, produces = JSON)
+	@PostMapping("/config")
+	public Config updateConfiguration(@RequestBody Config config) {
+		return services.updateConfiguration(config);
 	}
 
 	
 	@ApiOperation(value = "Delete a configuration and all snapshots associated with it.")
 	@DeleteMapping("/config/{nodeId}")
 	public void deleteNode(@PathVariable final int nodeId) {
-		
-		services.deleteConfiguration(nodeId);
+		services.deleteNode(nodeId);
 	}
 	
 	
-	@ApiOperation(value = "Get all snapshots for a config. NOTE: preliminary snapshots are not included.", produces = "application/json;charset=UTF-8")
+	@ApiOperation(value = "Get all snapshots for a config. NOTE: preliminary snapshots are not included.", produces = JSON)
 	@GetMapping("/config/{nodeId}/snapshots")
 	public List<Snapshot> getSnapshots(@PathVariable int nodeId) {
 		return services.getSnapshots(nodeId);
 	}
 	
-	@ApiOperation(value = "Moves a node (and the sub-tree in case of a folder node) to another target folder.", produces = "application/json;charset=UTF-8")
+	@ApiOperation(value = "Moves a node (and the sub-tree in case of a folder node) to another target folder.", produces = JSON)
 	@PostMapping("/node/{nodeId}")
-	public Folder moveNode(@PathVariable int nodeId, @RequestParam(value = "to") int targetNodeId) {
-		return services.moveNode(nodeId, targetNodeId);
+	public Folder moveNode(@PathVariable int nodeId, @RequestParam(value = "to", required = true) int to) {
+		return services.moveNode(nodeId, to);
+	}
+	
+	@ApiOperation(value = "Renames a Node. The parent directory must not contain a node with same name and type.", produces = JSON)
+	@PostMapping("/node/{nodeId}/rename")
+	public Node renameNode(@PathVariable int nodeId, @RequestParam(value = "name", required = true) String name) {
+		return services.renameNode(nodeId, name);
 	}
 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 import se.esss.ics.masar.model.Config;
 import se.esss.ics.masar.model.Folder;
+import se.esss.ics.masar.model.Node;
 import se.esss.ics.masar.model.Snapshot;
 
 public interface IServices {
@@ -15,9 +16,7 @@ public interface IServices {
 	public Config createNewConfiguration(Config configuration);
 	
 	public Config getConfiguration(int nodeId);
-		
-	public void deleteConfiguration(int nodeId);
-		
+			
 	public Snapshot takeSnapshot(int configId);
 	
 	public Snapshot commitSnapshot(int snapshotId, String userName, String comment);
@@ -30,6 +29,10 @@ public interface IServices {
 	
 	public Folder moveNode(int nodeId, int targetNodeId);
 	
-	public void deleteFolder(int nodeId);
+	public void deleteNode(int nodeId);
+	
+	public Config updateConfiguration(Config config);
+	
+	public Node renameNode(int nodeId, String name);
 
 }

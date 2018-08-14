@@ -1,12 +1,10 @@
 package se.esss.ics.masar.persistence.config;
 
 
-import org.flywaydb.core.Flyway;
-import org.flywaydb.core.internal.dbsupport.JdbcTemplate;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

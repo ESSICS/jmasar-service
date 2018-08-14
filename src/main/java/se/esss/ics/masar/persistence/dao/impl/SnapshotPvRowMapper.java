@@ -39,7 +39,14 @@ public class SnapshotPvRowMapper implements RowMapper<SnapshotPv<?>> {
 	
 	}
 	
-	private Object getTypedValue(String valueAsString, String className) {
+	@SuppressWarnings("unchecked")
+	protected Object getTypedValue(String valueAsString, String className) {
+		
+		if(className == null) {
+			LoggerFactory.getLogger(SnapshotPvRowMapper.class).error("Not attempting to read a value of null class name");
+			return null;
+		}
+		
 		try {
 			Class clazz = Class.forName(className);
 			

@@ -1,5 +1,10 @@
 package se.esss.ics.masar.epics.config;
 
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import org.epics.pvaClient.PvaClient;
 import org.epics.pvaClient.PvaClientChannel;
 import org.epics.pvaClient.PvaClientGet;
@@ -19,10 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import se.esss.ics.masar.epics.IEpicsService;
-import se.esss.ics.masar.epics.exception.PVReadException;
 import se.esss.ics.masar.epics.impl.EpicsService;
-
-import static org.mockito.Mockito.*;
 
 @Configuration
 public class EpicsServiceTestConfig {
@@ -45,7 +47,7 @@ public class EpicsServiceTestConfig {
 			
 			@Override
 			public PvaClientChannel answer(InvocationOnMock invocation) {
-				String channelName = invocation.getArgumentAt(0, String.class);
+				String channelName = invocation.getArgument(0);
 				if("channelName".equals(channelName)) {
 					return pvaClientChannel;
 				}

@@ -22,7 +22,7 @@ public class EpicsService implements IEpicsService {
 
 		PvaClientGetData pvaClientGetData;
 		try {
-			pvaClientGetData = pvaClient.channel(configPv.getPvName(), "ca", 2.0).get().getData();
+			pvaClientGetData = pvaClient.channel(configPv.getPvName(), "ca", 3.0).get().getData();
 			PVStructure myPVStructure = pvaClientGetData.getPVStructure();
 			return SnapshotPvFactory.createSnapshotPv(configPv, myPVStructure);
 		} catch (Exception e1) {

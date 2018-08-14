@@ -1,12 +1,16 @@
-CREATE DOMAIN node_type AS TEXT DEFAULT 'FOLDER' CHECK VALUE IN ('FOLDER', 'CONFIGURATION');
 
 CREATE TABLE IF NOT EXISTS node(
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
-  type node_type,
+  type TEXT NOT NULL,
   created TIMESTAMP NOT NULL,
   last_modified TIMESTAMP NOT NULL
 );
+
+CREATE TRIGGER node_updated_trigger
+  BEFORE UPDATE
+  ON node
+  FOR EACH ROW CALL "se.esss.ics.masar.persistence.h2.H2Trigger";
 
 CREATE TABLE IF NOT EXISTS node_closure(
   ancestor INTEGER NOT NULL REFERENCES node(id) ON DELETE CASCADE,
@@ -21,7 +25,13 @@ CREATE TABLE IF NOT EXISTS config (
   node_id INTEGER REFERENCES node(id) ON DELETE CASCADE,
   active INTEGER NOT NULL DEFAULT 1,
   description TEXT NOT NULL,
-  system TEXT
+  _system TEXT
+);
+
+CREATE TABLE IF NOT EXISTS node_closure(
+  ancestor INTEGER NOT NULL REFERENCES node(id) ON DELETE CASCADE,
+  descendant INTEGER NOT NULL REFERENCES node(id) ON DELETE CASCADE,
+  depth INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS config_pv (

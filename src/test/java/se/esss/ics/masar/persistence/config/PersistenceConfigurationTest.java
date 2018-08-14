@@ -3,6 +3,8 @@ package se.esss.ics.masar.persistence.config;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import javax.sql.DataSource;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +16,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zaxxer.hikari.HikariDataSource;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextHierarchy({ @ContextConfiguration(classes = { PersistenceConfiguration.class }) })
@@ -22,7 +23,7 @@ import com.zaxxer.hikari.HikariDataSource;
 public class PersistenceConfigurationTest {
 	
 	@Autowired
-	private HikariDataSource dataSource;
+	private DataSource dataSource;
 	
 	@Autowired
 	private SimpleJdbcInsert configurationInsert;

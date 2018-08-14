@@ -58,15 +58,14 @@ public class SnapshotJdbcDAO implements SnapshotDAO {
 	@Override
 	public Snapshot getSnapshot(int snapshotId, boolean committedOnly) {
 
-		String sql = committedOnly
-				? "select snapshot.id, config_id, username_id, created, comment, approve, name from snapshot join "
-						+ "username on snapshot.username_id=username.id where snapshot.id=?"
-				: "select snapshot.id, config_id, username_id, created, NULL as comment, approve, NULL as name from snapshot "
-						+ "where snapshot.id=?";
-
 		Snapshot snapshot;
 		try {
-			snapshot = jdbcTemplate.queryForObject(sql, new Object[] { snapshotId }, new SnapshotRowMapper());
+			snapshot = committedOnly ? jdbcTemplate.queryForObject(
+					"select snapshot.id, config_id, username_id, created, comment, approve, name from snapshot join username on snapshot.username_id=username.id where snapshot.id=?",
+					new Object[] { snapshotId }, new SnapshotRowMapper())
+					: jdbcTemplate.queryForObject(
+							"select snapshot.id, config_id, username_id, created, NULL as comment, approve, NULL as name from snapshot where snapshot.id=?",
+							new Object[] { snapshotId }, new SnapshotRowMapper());
 		} catch (DataAccessException e) {
 			// No committed snapshot corresponding to snapshotId found
 			return null;

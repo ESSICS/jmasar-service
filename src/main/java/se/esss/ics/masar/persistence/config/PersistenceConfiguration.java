@@ -2,10 +2,11 @@ package se.esss.ics.masar.persistence.config;
 
 import javax.sql.DataSource;
 
-import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -18,10 +19,10 @@ import com.zaxxer.hikari.HikariDataSource;
 public class PersistenceConfiguration {
 
 	@Bean
+	@Primary
 	@ConfigurationProperties(prefix = "spring.datasource")
-	public HikariDataSource dataSource() {
-		return (HikariDataSource) DataSourceBuilder.create().type(HikariDataSource.class)
-				.build();
+	public DataSource dataSource() {
+		return DataSourceBuilder.create().type(HikariDataSource.class).build();
 	}
 
 	@Bean
@@ -76,12 +77,12 @@ public class PersistenceConfiguration {
 	public ObjectMapper objectMapper() {
 		return new ObjectMapper();
 	}
-	
+
 	@Bean
 	public SimpleJdbcInsert nodeInsert() {
 		return new SimpleJdbcInsert(dataSource()).withTableName("node").usingGeneratedKeyColumns("id");
 	}
-	
+
 	@Bean
 	public SimpleJdbcInsert nodeClosureInsert() {
 		return new SimpleJdbcInsert(dataSource()).withTableName("node_closure");

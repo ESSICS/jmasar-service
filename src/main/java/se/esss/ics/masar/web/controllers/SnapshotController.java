@@ -25,14 +25,14 @@ public class SnapshotController extends BaseController {
 		return services.takeSnapshot(configId);
 	}
 
-	@ApiOperation(value = "Get a snapshot, including its values.", consumes = "application/json;charset=UTF-8")
+	@ApiOperation(value = "Get a snapshot, including its values.", consumes = JSON)
 	@GetMapping("/snapshot/{snapshotId}")
 	public Snapshot getSnapshot(@PathVariable int snapshotId) {
 
 		return services.getSnapshot(snapshotId);
 	}
 
-	@ApiOperation(value = "Delete a snapshot", consumes = "application/json;charset=UTF-8")
+	@ApiOperation(value = "Delete a snapshot", consumes = JSON)
 	@DeleteMapping("/snapshot/{snapshotId}")
 	public void deleteSnapshot(@PathVariable int snapshotId) {
 

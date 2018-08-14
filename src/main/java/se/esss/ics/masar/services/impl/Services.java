@@ -13,6 +13,7 @@ import se.esss.ics.masar.epics.exception.PVReadException;
 import se.esss.ics.masar.model.Config;
 import se.esss.ics.masar.model.ConfigPv;
 import se.esss.ics.masar.model.Folder;
+import se.esss.ics.masar.model.Node;
 import se.esss.ics.masar.model.Snapshot;
 import se.esss.ics.masar.model.SnapshotPv;
 import se.esss.ics.masar.persistence.dao.ConfigDAO;
@@ -54,15 +55,13 @@ public class Services implements IServices{
 	
 	@Override
 	@Transactional
-	public Snapshot takeSnapshot(int configId) {
+	public Snapshot takeSnapshot(int nodeId) {
 		
-		Config config = configDAO.getConfiguration(configId);
+		Config config = configDAO.getConfiguration(nodeId);
 		
 		if(config == null) {
-			throw new ConfigNotFoundException("Cannot take snapshot for config with id=" + configId  + " as it does not exist.");
+			throw new ConfigNotFoundException("Configuration with id=" + nodeId + " does not exist.");
 		}
-		
-	
 		
 		List<SnapshotPv<?>> snapshotPvs = new ArrayList<>();
 		
@@ -75,7 +74,7 @@ public class Services implements IServices{
 		}
 		
 		Snapshot snapshot = Snapshot.builder()
-				.configId(configId)
+				.configId(nodeId)
 				.snapshotPvList(snapshotPvs)
 				.build();
 		
@@ -127,19 +126,25 @@ public class Services implements IServices{
 	
 	@Override
 	@Transactional
-	public void deleteConfiguration(int nodeId) {
-		configDAO.deleteConfiguration(nodeId);
-	}
-	
-	@Override
-	@Transactional
 	public Folder moveNode(int nodeId, int targetNodeId) {
 		return configDAO.moveNode(nodeId, targetNodeId);
 	}
 	
 	@Override
 	@Transactional
-	public void deleteFolder(int nodeId) {
-		configDAO.deleteFolder(nodeId);
+	public void deleteNode(int nodeId) {
+		configDAO.deleteNode(nodeId);
+	}
+	
+	@Override
+	@Transactional
+	public Config updateConfiguration(Config config) {
+	
+		return configDAO.updateConfiguration(config);
+	}
+	
+	@Override
+	public Node renameNode(int nodeId, String name) {
+		return configDAO.renameNode(nodeId, name);
 	}
 }

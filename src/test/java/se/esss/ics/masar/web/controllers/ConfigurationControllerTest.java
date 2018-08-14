@@ -1,7 +1,6 @@
 package se.esss.ics.masar.web.controllers;
 
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -16,6 +15,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -37,6 +37,7 @@ import se.esss.ics.masar.model.Snapshot;
 import se.esss.ics.masar.model.SnapshotPv;
 import se.esss.ics.masar.services.IServices;
 import se.esss.ics.masar.services.exception.ConfigNotFoundException;
+import se.esss.ics.masar.services.exception.NodeNotFoundException;
 import se.esss.ics.masar.web.config.ControllersTestConfig;
 import springfox.documentation.spring.web.plugins.Docket;
 
@@ -78,6 +79,7 @@ public class ConfigurationControllerTest {
 	private static final String JSON = "application/json;charset=UTF-8";
 
 	@Before
+	@SuppressWarnings("rawtypes")
 	public void setUp() {
 
 		ConfigPv configPv = ConfigPv.builder().groupname("groupname").pvName("pvName").readonly(true).tags("tags")
@@ -216,6 +218,28 @@ public class ConfigurationControllerTest {
 		// Make sure response contains expected data
 		objectMapper.readValue(result.getResponse().getContentAsString(), Config.class);
 	}
+	
+	@Test
+	public void testGetNonExistingConfiguration() throws Exception {
+		when(services.getConfiguration(1)).thenThrow(NodeNotFoundException.class);
+
+		MockHttpServletRequestBuilder request = get("/config/1");
+
+		mockMvc.perform(request).andExpect(status().isNotFound());
+		
+		Mockito.reset(services);
+	}
+	
+	@Test
+	public void testGetNonExistingFoldern() throws Exception {
+		when(services.getFolder(1)).thenThrow(NodeNotFoundException.class);
+
+		MockHttpServletRequestBuilder request = get("/folder/1");
+
+		mockMvc.perform(request).andExpect(status().isNotFound());
+		
+		Mockito.reset(services);
+	}
 
 	@Test
 	public void testMoveNode() throws Exception {
@@ -228,6 +252,23 @@ public class ConfigurationControllerTest {
 
 		// Make sure response contains expected data
 		objectMapper.readValue(result.getResponse().getContentAsString(), Folder.class);
+	}
+	
+	@Test
+	public void testUpdateConfig() throws Exception {
+		
+		Config config = Config.builder().id(0).build();
+		
+		when(services.updateConfiguration(Mockito.any(Config.class))).thenReturn(config);
+
+		MockHttpServletRequestBuilder request = post("/config").contentType(JSON)
+				.content(objectMapper.writeValueAsString(config));
+
+		MvcResult result = mockMvc.perform(request).andExpect(status().isOk()).andExpect(content().contentType(JSON))
+				.andReturn();
+
+		// Make sure response contains expected data
+		objectMapper.readValue(result.getResponse().getContentAsString(), Config.class);
 	}
 
 	@Test
@@ -243,5 +284,40 @@ public class ConfigurationControllerTest {
 	@Test
 	public void verifySwaggerConfig() {
 		assertNotNull(productApi);
+	}
+	
+	@Test
+	public void testRenameNodeIllegalArgument() throws Exception{
+		when(services.renameNode(1, "whatever")).thenThrow(IllegalArgumentException.class);
+		
+		MockHttpServletRequestBuilder request = post("/node/1/rename?name=whatever");
+
+		mockMvc.perform(request).andExpect(status().isBadRequest());
+	}
+	
+	@Test
+	public void testRenameNodeNoRequestParam() throws Exception{
+	
+		MockHttpServletRequestBuilder request = post("/node/1/rename");
+
+		mockMvc.perform(request).andExpect(status().isBadRequest());
+	}
+	
+	@Test
+	public void testRenameNode() throws Exception{
+		
+		Node node = new Node();
+		node.setName("foo");
+		
+		when(services.renameNode(1, "whatever")).thenReturn(node);
+		
+		MockHttpServletRequestBuilder request = post("/node/1/rename?name=whatever");
+		
+		MvcResult result = mockMvc.perform(request).andExpect(status().isOk()).andExpect(content().contentType(JSON))
+				.andReturn();
+
+		// Make sure response contains expected data
+		objectMapper.readValue(result.getResponse().getContentAsString(), Node.class);
+		
 	}
 }

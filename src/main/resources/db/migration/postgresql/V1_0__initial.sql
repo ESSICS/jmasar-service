@@ -7,12 +7,11 @@ CREATE FUNCTION update_updated_at_column() RETURNS trigger
   END;
 $$;
 
-CREATE TYPE node_type AS ENUM ('FOLDER', 'CONFIGURATION');
 
 CREATE TABLE IF NOT EXISTS node(
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
-  type node_type,
+  type TEXT NOT NULL,
   created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -34,7 +33,7 @@ CREATE TABLE IF NOT EXISTS config (
   node_id INTEGER REFERENCES node(id) ON DELETE CASCADE,
   active INTEGER NOT NULL DEFAULT 1,
   description TEXT NOT NULL,
-  system TEXT
+  _system TEXT
 );
 
 CREATE TABLE IF NOT EXISTS config_pv (

@@ -3,10 +3,10 @@ package se.esss.ics.masar.services.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -290,9 +290,9 @@ public class ServicesTest {
 	@Test
 	public void testDeleteConfiguration() {
 			
-		services.deleteConfiguration(1);
+		services.deleteNode(1);
 		
-		verify(configDAO, atLeast(1)).deleteConfiguration(1);
+		verify(configDAO, atLeast(1)).deleteNode(1);
 		
 		reset(configDAO);
 	}
@@ -300,9 +300,9 @@ public class ServicesTest {
 	@Test
 	public void testDeleteFolder() {
 			
-		services.deleteFolder(1);
+		services.deleteNode(1);
 		
-		verify(configDAO, atLeast(1)).deleteFolder(1);
+		verify(configDAO, atLeast(1)).deleteNode(1);
 		
 		reset(configDAO);
 	}
@@ -313,6 +313,16 @@ public class ServicesTest {
 		services.moveNode(1, 2);
 		
 		verify(configDAO, atLeast(1)).moveNode(1, 2);
+		
+		reset(configDAO);
+	}
+	
+	@Test
+	public void testRenameNode() {
+			
+		services.renameNode(1, "whatever");
+		
+		verify(configDAO, atLeast(1)).renameNode(1, "whatever");
 		
 		reset(configDAO);
 	}

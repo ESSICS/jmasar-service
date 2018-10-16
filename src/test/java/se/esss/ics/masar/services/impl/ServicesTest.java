@@ -327,4 +327,11 @@ public class ServicesTest {
 		reset(configDAO);
 	}
 	
+	@Test 
+	public void testTimestamp() {
+		long timeNanoSeconds = 1538037556314456383L;
+		
+		System.out.println(new Date(timeNanoSeconds / 1000000));
+	}
+	
 }

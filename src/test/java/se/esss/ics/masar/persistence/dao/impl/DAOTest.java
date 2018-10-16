@@ -328,7 +328,7 @@ public class DAOTest {
 				.build();
 
 		Snapshot snapshot = Snapshot.builder().approve(true).configId(config.getId())
-				.snapshotPvList(Arrays.asList(snapshotPv)).build();
+				.name("name").snapshotPvList(Arrays.asList(snapshotPv)).build();
 
 		Snapshot newSnapshot = configDAO.savePreliminarySnapshot(snapshot);
 
@@ -502,6 +502,7 @@ public class DAOTest {
 		ConfigPv configPv2 = ConfigPv.builder().pvName("configPv2").build();
 
 		Config config = Config.builder().active(true).name("My config").parent(folder1).description("description")
+				.name("name")
 				.system("system").configPvList(Arrays.asList(configPv1, configPv2)).build();
 
 		config = configDAO.createConfiguration(config);
@@ -515,7 +516,7 @@ public class DAOTest {
 				.time(1000L).timens(20000).value(20).configPv(config.getConfigPvList().get(1)).build();
 
 		Snapshot snapshot = Snapshot.builder().approve(true).configId(config.getId())
-				.snapshotPvList(Arrays.asList(snapshotPv1, snapshotPv2)).build();
+				.name("name").snapshotPvList(Arrays.asList(snapshotPv1, snapshotPv2)).build();
 
 		snapshot = configDAO.savePreliminarySnapshot(snapshot);
 

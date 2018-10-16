@@ -23,12 +23,14 @@ import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
 
 import se.esss.ics.masar.model.ConfigPv;
+import se.esss.ics.masar.model.Provider;
 
 
 public class ConfigPvRowMapper implements RowMapper<ConfigPv> {
 	
 	@Override
 	public ConfigPv mapRow(ResultSet resultSet, int rowIndex) throws SQLException {
+		String provider = resultSet.getString("provider");
 		return
 				ConfigPv.builder()
 				.id(resultSet.getInt("id"))
@@ -36,6 +38,7 @@ public class ConfigPvRowMapper implements RowMapper<ConfigPv> {
 				.pvName(resultSet.getString("name"))
 				.readonly(resultSet.getBoolean("readonly"))
 				.tags(resultSet.getString("tags"))
+				.provider(Provider.valueOf(provider))
 				.build();
 	}
 }

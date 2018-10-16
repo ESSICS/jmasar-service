@@ -1,5 +1,7 @@
 package se.esss.ics.masar.persistence.dao;
 
+import java.util.List;
+
 import se.esss.ics.masar.model.Config;
 import se.esss.ics.masar.model.Folder;
 import se.esss.ics.masar.model.Node;
@@ -79,5 +81,4 @@ public interface ConfigDAO {
 	 * @return The updated {@link Node} object.
 	 */
 	public Node renameNode(int nodeId, String name);
-
 }

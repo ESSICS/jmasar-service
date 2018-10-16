@@ -40,7 +40,7 @@ public class EpicsServiceTest {
 		ConfigPv configPv = ConfigPv.builder()
 				.pvName("badChannelName")
 				.build();
-		SnapshotPv snapshotPv = epicsService.getPv(configPv);
+		SnapshotPv<Object> snapshotPv = epicsService.getPv(configPv);
 		assertFalse(snapshotPv.isFetchStatus());
 	}
 }

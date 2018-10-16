@@ -1,4 +1,4 @@
-/** 
+/*
  * Copyright (C) 2018 European Spallation Source ERIC.
  *
  * This program is free software; you can redistribute it and/or
@@ -15,17 +15,26 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package se.esss.ics.masar.epics.config;
 
-import org.epics.pvaClient.PvaClient;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+package se.esss.ics.masar.web.controllers;
 
-@Configuration
-public class EpicsConfiguration {
-	
-	@Bean
-	public PvaClient pvaClient() {
-		return PvaClient.get("pva ca");
-	}
+import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * @author georgweiss
+ * Created 3 Oct 2018
+ */
+@Profile("production")
+@RestController
+public class SwaggerController {
+
+	@RequestMapping(value = "swagger-ui.html", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+    public void getSwaggerUI(){
+    }
 }

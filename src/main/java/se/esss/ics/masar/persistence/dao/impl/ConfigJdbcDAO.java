@@ -224,6 +224,7 @@ public class ConfigJdbcDAO implements ConfigDAO {
 			params.put("readonly", configPv.isReadonly());
 			params.put("tags", configPv.getTags());
 			params.put("groupName", configPv.getGroupname());
+			params.put("provider", configPv.getProvider().toString());
 
 			configPvId = configurationEntryInsert.executeAndReturnKey(params).intValue();
 		}
@@ -302,6 +303,7 @@ public class ConfigJdbcDAO implements ConfigDAO {
 		Map<String, Object> snapshotParams = new HashMap<>();
 		snapshotParams.put("config_id", snapshot.getConfigId());
 		snapshotParams.put("created", Timestamp.from(Instant.now()));
+		snapshotParams.put("name", snapshot.getName());
 
 		int snapshotId = snapshotInsert.executeAndReturnKey(snapshotParams).intValue();
 
@@ -419,5 +421,4 @@ public class ConfigJdbcDAO implements ConfigDAO {
 
 		return getNode(nodeId);
 	}
-
 }

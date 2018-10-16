@@ -55,7 +55,7 @@ public class SnapshotPvFactory {
 		
 	}
 	
-
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static <T> SnapshotPv<T> createSnapshotPv(ConfigPv configPv, PVStructure pvStructure){
 		
 		verifyRequiredFields(pvStructure);
@@ -78,6 +78,7 @@ public class SnapshotPvFactory {
 
 		return snapshotPv;
 	}
+	
 	
 	protected static void verifyRequiredFields(PVStructure pvStructure){
 		

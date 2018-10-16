@@ -1,6 +1,5 @@
 package se.esss.ics.masar.web.controllers;
 
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -39,7 +38,6 @@ import se.esss.ics.masar.services.IServices;
 import se.esss.ics.masar.services.exception.ConfigNotFoundException;
 import se.esss.ics.masar.services.exception.NodeNotFoundException;
 import se.esss.ics.masar.web.config.ControllersTestConfig;
-import springfox.documentation.spring.web.plugins.Docket;
 
 @RunWith(SpringRunner.class)
 @ContextHierarchy({ @ContextConfiguration(classes = { ControllersTestConfig.class, SwaggerConfig.class }) })
@@ -60,9 +58,6 @@ public class ConfigurationControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
-	
-	@Autowired
-	private Docket productApi;
 
 	private Node nodeFromClient;
 
@@ -279,11 +274,6 @@ public class ConfigurationControllerTest {
 
 		mockMvc.perform(request).andExpect(status().isBadRequest());
 
-	}
-	
-	@Test
-	public void verifySwaggerConfig() {
-		assertNotNull(productApi);
 	}
 	
 	@Test

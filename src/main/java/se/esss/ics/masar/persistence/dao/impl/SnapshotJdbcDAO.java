@@ -67,7 +67,7 @@ public class SnapshotJdbcDAO implements SnapshotDAO {
 	@Override
 	public List<Snapshot> getSnapshots(int configId) {
 		return jdbcTemplate.query(
-				"select snapshot.id, config_id, username_id, created, comment, approve, name from snapshot join "
+				"select snapshot.id, config_id, username_id, created, comment, approve, snapshot.name from snapshot join "
 						+ "username on snapshot.username_id=username.id where snapshot.config_id=?",
 				new Object[] { configId }, new SnapshotRowMapper());
 	}
@@ -78,7 +78,7 @@ public class SnapshotJdbcDAO implements SnapshotDAO {
 		Snapshot snapshot;
 		try {
 			snapshot = committedOnly ? jdbcTemplate.queryForObject(
-					"select snapshot.id, config_id, username_id, created, comment, approve, name from snapshot join username on snapshot.username_id=username.id where snapshot.id=?",
+					"select snapshot.id, config_id, username_id, created, comment, approve, snapshot.name from snapshot join username on snapshot.username_id=username.id where snapshot.id=?",
 					new Object[] { snapshotId }, new SnapshotRowMapper())
 					: jdbcTemplate.queryForObject(
 							"select snapshot.id, config_id, username_id, created, NULL as comment, approve, NULL as name from snapshot where snapshot.id=?",

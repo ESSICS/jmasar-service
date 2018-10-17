@@ -153,6 +153,18 @@
 		</dependency>
 	</dependencies>
 
+
+	<distributionManagement>
+		<repository>
+			<id>distribution-repository</id>
+			<url>${distribution.repository.release}</url>
+		</repository>
+		<snapshotRepository>
+			<id>distribution-repository</id>
+			<url>${distribution.repository.snapshot}</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 	<build>
 		<plugins>
 			<plugin>

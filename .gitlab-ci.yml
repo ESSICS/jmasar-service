@@ -1,0 +1,7 @@
+build:
+  stage: build
+  image: registry.esss.lu.se/ics-docker/maven:openjdk-8
+  tags:
+    - docker
+  script:
+    - mvn --batch-mode clean deploy -Dserver.id=distribution-repository -Dserver.username=${ARTIFACTORY_USERNAME} -Dserver.password=${ARTIFACTORY_PASSWORD} -Ddistribution.repository.snapshot=${ARTIFACTORY_URL}/libs-snapshot-local -Ddistribution.repository.release=${ARTIFACTORY_URL}/libs-release-local

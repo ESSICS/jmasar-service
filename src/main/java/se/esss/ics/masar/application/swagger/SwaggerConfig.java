@@ -18,6 +18,7 @@
 
 package se.esss.ics.masar.application.swagger;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -29,16 +30,17 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
 @EnableSwagger2
-@Profile({"development", "test"})
+@Profile({ "development", "test" })
 public class SwaggerConfig {
-	
+
+	@Value("${hostname:localhost}")
+	private String hostname;
+
 	@Bean
-    public Docket productApi() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .select().apis(RequestHandlerSelectors.basePackage("se.esss.ics.masar"))
-                .build();
-             
-    }
-	
+	public Docket productApi() {
+		return new Docket(DocumentationType.SWAGGER_2).host(hostname).select()
+				.apis(RequestHandlerSelectors.basePackage("se.esss.ics.masar")).build();
+
+	}
+
 }
-	

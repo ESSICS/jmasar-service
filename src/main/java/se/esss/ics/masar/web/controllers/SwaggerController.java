@@ -33,6 +33,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class SwaggerController {
 
+	/**
+	 * Ensures that when the service is launched with profile "production", the
+	 * Swagger UI (swagger-ui.html) is disabled and instead returns a HTTP status 404.
+	 */
 	@RequestMapping(value = "swagger-ui.html", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.NOT_FOUND)
     public void getSwaggerUI(){

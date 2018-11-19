@@ -86,9 +86,8 @@ public class ConfigurationControllerTest {
 		config1 = Config.builder().active(true).configPvList(Arrays.asList(configPv)).description("description")
 				.system("system").build();
 
-		Node node = new Node();
-		node.setId(0);
-		folderFromClient = Folder.builder().name("SomeFolder").id(11).parent(node).build();
+	
+		folderFromClient = Folder.builder().name("SomeFolder").id(11).parentId(0).build();
 
 		SnapshotPv snapshotPv = SnapshotPv.builder().dtype(1).fetchStatus(true).severity(0).status(1).time(1000L)
 				.timens(777).value(new Double(7.7)).build();
@@ -106,7 +105,7 @@ public class ConfigurationControllerTest {
 		nodeFromClient = new Node();
 		nodeFromClient.setId(77);
 		nodeFromClient.setName("Folder");
-		nodeFromClient.setParent(parentNode);
+		nodeFromClient.setParentId(parentNode.getId());
 	}
 
 	@Test

@@ -20,6 +20,7 @@ import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,7 +100,7 @@ public class ServicesTest {
 				.configPvList(Arrays.asList(configPv))
 				.description("description")
 				.system("system")
-				.parent(new Node())
+				.parentId(1)
 				.build();
 		
 		when(configDAO.createConfiguration(configFromClient)).thenReturn(configFromClient);
@@ -115,6 +116,7 @@ public class ServicesTest {
 	
 	@Test
 	public void testCreateConfiguration() {
+		when(configDAO.getFolder(1)).thenReturn(Folder.builder().id(1).build());
 		services.createNewConfiguration(configWithParent);
 	}
 	
@@ -267,8 +269,10 @@ public class ServicesTest {
 	@Test
 	public void testCreateNewFolder() {
 		
-		Folder folderFromClient = Folder.builder().name("SomeFolder").id(11)
-				.parent(Folder.builder().id(0).build()).build();
+		Folder folderFromClient = Folder.builder().name("SomeFolder")
+				.parentId(0).build();
+		
+		when(configDAO.getFolder(0)).thenReturn(Folder.builder().parentId(0).build());
 		
 		services.createFolder(folderFromClient);
 		

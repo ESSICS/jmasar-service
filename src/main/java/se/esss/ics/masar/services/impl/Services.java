@@ -58,8 +58,9 @@ public class Services implements IServices{
 	@Transactional
 	public Config createNewConfiguration(Config config) {
 		
-		if(config.getParent() == null) {
-			throw new IllegalArgumentException("Parent of configuration not specified");
+		Folder parentFolder = configDAO.getFolder(config.getParentId());
+		if(parentFolder == null) {
+			throw new IllegalArgumentException("Parent folder for configuration does not exist");
 		}
 		return configDAO.createConfiguration(config);
 	}
@@ -128,8 +129,9 @@ public class Services implements IServices{
 	@Override
 	public Folder createFolder(Folder folder) {
 		
-		if(folder.getParent() == null) {
-			throw new IllegalArgumentException("Cannot create new folder as parent folder is not specified.");
+		Folder parentFolder = configDAO.getFolder(folder.getParentId());
+		if(parentFolder == null) {
+			throw new IllegalArgumentException("Cannot create new folder as parent folder does not exist.");
 		}
 	
 		return configDAO.createFolder(folder);

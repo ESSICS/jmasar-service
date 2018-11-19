@@ -82,15 +82,18 @@ public class ConfigJdbcDAO implements ConfigDAO {
 	@Override
 	public Folder createFolder(final Folder folder) {
 
-		Node newNode = newNode(folder);
+		int newNodeId = newNode(folder);
 
-		return getFolder(newNode.getId());
+		return getFolder(newNodeId);
 	}
 
 	@Transactional
 	@Override
 	public Folder getFolder(int nodeId) {
 		Node node = getNode(nodeId);
+		if(node == null) {
+			return null;
+		}
 		if (node instanceof Folder) {
 			return (Folder) node;
 		} else {
@@ -112,29 +115,36 @@ public class ConfigJdbcDAO implements ConfigDAO {
 	}
 
 	private Node getParentNode(int nodeId) {
+		
+		// Root folder is its own parent
+		if(nodeId == Node.ROOT_NODE_ID) {
+			Node node = new Node();
+			node.setId(Node.ROOT_NODE_ID);
+			return node;
+		}
 
 		try {
 			int parentNodeId = jdbcTemplate.queryForObject(
 					"select ancestor from node_closure where descendant=? and depth=1", new Object[] { nodeId },
 					Integer.class);
-			return getNodeInternal(parentNodeId);
+			return getNode(parentNodeId);
 		} catch (DataAccessException e) {
 			return null;
 		}
 	}
 
-	private Node newNode(final Node node) {
-
-		if (node.getParent() == null) {
-			throw new IllegalArgumentException("Cannot create a node without a parent.");
+	private int newNode(final Node node) {
+		
+		Node parentNode = getNode(node.getParentId());
+		
+		if (parentNode == null) {
+			throw new IllegalArgumentException("Cannot create new node as parent node does not exist.");
 		}
-
-		Node parent = getNodeInternal(node.getParent().getId());
 
 		// The node to be created cannot have same name and type as any of the parent's
 		// child nodes
 
-		List<Node> childNodes = getChildNodes(parent.getId());
+		List<Node> childNodes = getChildNodes(parentNode.getId());
 		if (doesNameClash(node, childNodes)) {
 			throw new IllegalArgumentException("Node of same name and type already exists in parent node.");
 		}
@@ -152,17 +162,30 @@ public class ConfigJdbcDAO implements ConfigDAO {
 		jdbcTemplate.update(
 				"insert into node_closure (ancestor, descendant, depth) " + "select t.ancestor, " + newNodeId
 						+ ", t.depth + 1  from node_closure as t where t.descendant = ? union all select ?, ?, 0",
-				parent.getId(), newNodeId, newNodeId);
+				parentNode.getId(), newNodeId, newNodeId);
 
 		// Update the last modified date of the parent folder
-		jdbcTemplate.update("update node set last_modified=? where id=?", Timestamp.from(Instant.now()), parent.getId());
+		jdbcTemplate.update("update node set last_modified=? where id=?", Timestamp.from(Instant.now()), parentNode.getId());
 
-		return getNodeInternal(newNodeId);
+		return newNodeId;
 	}
 
+	/**
+	 * Retrieves a {@link Node} associated with the specified node id. If the node exists and is a configuration node,
+	 * the returned object is a {@link Config} node, including the list of {@link ConfigPv}s is also present. If on
+	 * the other hand the node is a folder, a {@link Folder} object is returned, including the list of child nodes.
+	 * @param nodeId The node id.
+	 * @return <code>null</code> if the node id does not exist, otherwise either a {@link Folder} or a {@link Config} object.
+	 */
 	private Node getNode(int nodeId) {
 
-		Node node = getNodeInternal(nodeId);
+		Node node;
+		try {
+			node = jdbcTemplate.queryForObject("select * from node where id=?", new Object[] { nodeId },
+					new NodeRowMapper());
+		} catch (DataAccessException e) {
+			return null;
+		}
 
 		if (node.getNodeType().equals(NodeType.CONFIGURATION)) {
 
@@ -171,11 +194,19 @@ public class ConfigJdbcDAO implements ConfigDAO {
 					new Object[] { nodeId, NodeType.CONFIGURATION.toString() }, new ConfigRowMapper());
 
 			config.setConfigPvList(getConfigPvs(config.getId()));
-			config.setParent(getParentNode(config.getId()));
+			Node parentNode = getParentNode(config.getId());
+			if(parentNode == null) {
+				throw new NodeNotFoundException(String.format("Parent of existing configuration with id=%d not found. THIS SHOULD NOT HAPPEN!", config.getId()));
+			}
+			config.setParentId(parentNode.getId());
 			return config;
 		} else {
+			Node parentNode = getParentNode(nodeId);
+			if(parentNode == null) {
+				throw new NodeNotFoundException(String.format("Parent of existing folder with id=%d not found. THIS SHOULD NOT HAPPEN!", nodeId));
+			}
 			return Folder.builder().created(node.getCreated()).lastModified(node.getLastModified()).id(node.getId())
-					.childNodes(getChildNodes(node.getId())).parent(getParentNode(nodeId)).name(node.getName()).build();
+					.childNodes(getChildNodes(node.getId())).parentId(parentNode.getId()).name(node.getName()).build();
 		}
 	}
 
@@ -189,10 +220,10 @@ public class ConfigJdbcDAO implements ConfigDAO {
 	@Transactional
 	public Config createConfiguration(Config config) {
 
-		Node newNode = newNode(config);
+		int newNodeId = newNode(config);
 
 		Map<String, Object> params = new HashMap<>(4);
-		params.put("node_id", newNode.getId());
+		params.put("node_id", newNodeId);
 		params.put("description", config.getDescription());
 		params.put("_system", config.getSystem());
 		params.put("active", config.isActive());
@@ -202,11 +233,11 @@ public class ConfigJdbcDAO implements ConfigDAO {
 
 		if (config.getConfigPvList() != null) {
 			for (ConfigPv configPv : config.getConfigPvList()) {
-				saveConfigPv(newNode.getId(), configPv);
+				saveConfigPv(newNodeId, configPv);
 			}
 		}
 
-		return getConfiguration(newNode.getId());
+		return getConfiguration(newNodeId);
 	}
 
 	private void saveConfigPv(int configId, ConfigPv configPv) {
@@ -242,16 +273,6 @@ public class ConfigJdbcDAO implements ConfigDAO {
 				new Object[] { configId }, new ConfigPvRowMapper());
 	}
 
-	private Node getNodeInternal(int nodeId) {
-		try {
-			return jdbcTemplate.queryForObject("select * from node where id=?", new Object[] { nodeId },
-					new NodeRowMapper());
-		} catch (DataAccessException e) {
-			throw new NodeNotFoundException(
-					String.format("Unable to retrieve node id=%d not found, cause: %s", nodeId, e.getMessage()));
-		}
-	}
-
 	protected void deleteConfiguration(int nodeId) {
 
 		List<Integer> configPvIds = jdbcTemplate.queryForList(
@@ -271,7 +292,12 @@ public class ConfigJdbcDAO implements ConfigDAO {
 			return;
 		}
 		Node nodeToDelete = getNode(nodeId);
-		Node parentNode = nodeToDelete.getParent();
+		
+		if(nodeToDelete == null) {
+			throw new NodeNotFoundException(String.format("Node with id=%d does not exist", nodeId));
+		}
+		
+		int parentNodeId = nodeToDelete.getParentId();
 		if (nodeToDelete instanceof Config) {
 			deleteConfiguration(nodeId);
 		} else {
@@ -283,7 +309,7 @@ public class ConfigJdbcDAO implements ConfigDAO {
 		jdbcTemplate.update("delete from node where id=?", nodeId);
 
 		// Update last modified date of the parent node
-		jdbcTemplate.update("update node set last_modified=? where id=?", Timestamp.from(Instant.now()), parentNode.getId());
+		jdbcTemplate.update("update node set last_modified=? where id=?", Timestamp.from(Instant.now()), parentNodeId);
 	}
 
 	private void deleteOrphanedPVs(Collection<Integer> pvList) {
@@ -339,10 +365,18 @@ public class ConfigJdbcDAO implements ConfigDAO {
 	public Folder moveNode(int nodeId, int targetNodeId) {
 
 		Node sourceNode = getNode(nodeId);
+		
+		if(sourceNode == null) {
+			throw new NodeNotFoundException(String.format("Source node with id=%d not found", nodeId));
+		}
 
-		int parentNodeId = sourceNode.getParent().getId();
+		int parentNodeId = sourceNode.getParentId();
 
 		Folder targetNode = getFolder(targetNodeId);
+		
+		if(targetNode == null) {
+			throw new NodeNotFoundException(String.format("Traget node with id=%d not found", nodeId));
+		}
 
 		if (doesNameClash(sourceNode, targetNode.getChildNodes())) {
 			throw new IllegalArgumentException("Node of same name and type already exists in target node.");
@@ -377,8 +411,17 @@ public class ConfigJdbcDAO implements ConfigDAO {
 	@Override
 	@Transactional
 	public Config updateConfiguration(Config config) {
+		
+		Node node = getNode(config.getId());
+		
+		if(node == null) {
+			throw new NodeNotFoundException(String.format("Config with id=%d not found", config.getId()));
+		}
+		else if(!node.getNodeType().equals(NodeType.CONFIGURATION)) {
+			throw new IllegalArgumentException(String.format("Node with id=%d is not a configuration", config.getId()));
+		}
 
-		Config existingConfig = (Config) getNode(config.getId());
+		Config existingConfig = (Config) node;
 
 		Collection<ConfigPv> pvsToRemove = CollectionUtils.removeAll(existingConfig.getConfigPvList(),
 				config.getConfigPvList());
@@ -404,8 +447,11 @@ public class ConfigJdbcDAO implements ConfigDAO {
 		}
 
 		Node nodeToChange = getNode(nodeId);
+		if(nodeToChange == null) {
+			throw new NodeNotFoundException(String.format("Node with id=%d not found", nodeId));
+		}
 
-		Folder parentFolder = getFolder(nodeToChange.getParent().getId());
+		Folder parentFolder = getFolder(nodeToChange.getParentId());
 
 		// Create a node object used to check name clash
 		Node tmp = new Node();

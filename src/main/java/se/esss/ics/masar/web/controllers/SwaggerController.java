@@ -20,8 +20,7 @@ package se.esss.ics.masar.web.controllers;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,8 +36,9 @@ public class SwaggerController {
 	 * Ensures that when the service is launched with profile "production", the
 	 * Swagger UI (swagger-ui.html) is disabled and instead returns a HTTP status 404.
 	 */
-	@RequestMapping(value = "swagger-ui.html", method = RequestMethod.GET)
+	@GetMapping(value = "swagger-ui.html")
 	@ResponseStatus(HttpStatus.NOT_FOUND)
     public void getSwaggerUI(){
+		// Purpose of this handler method is to return a 404 in a production environment.
     }
 }

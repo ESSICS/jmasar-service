@@ -19,8 +19,6 @@ package se.esss.ics.masar.web.controllers;
 
 import java.util.List;
 
-import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -77,7 +75,7 @@ public class ConfigurationController extends BaseController{
 
 	@ApiOperation(value = "Create a new configuration", consumes = JSON)
 	@PutMapping("/config")
-	public Config saveConfiguration(@Valid @RequestBody final Config configuration) {
+	public Config saveConfiguration(@RequestBody final Config configuration) {
 		return services.createNewConfiguration(configuration);
 	}
 	

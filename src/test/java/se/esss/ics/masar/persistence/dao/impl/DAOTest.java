@@ -49,7 +49,7 @@ public class DAOTest {
 	@Autowired
 	private SnapshotDAO snapshotDAO;
 
-	@Test(expected = NodeNotFoundException.class)
+	@Test(expected = IllegalArgumentException.class)
 	@FlywayTest(invokeCleanDB = true)
 	public void testCreateConfigNoParentFound() {
 
@@ -59,10 +59,7 @@ public class DAOTest {
 		Config config = Config.builder().active(true).configPvList(Arrays.asList(configPv)).description("description")
 				.system("system").build();
 
-		Node parentNode = new Node();
-		parentNode.setId(2);
-
-		config.setParent(parentNode);
+		config.setParentId(2);
 		// The parent node does not exist in the database, so this throws an exception
 		configDAO.createConfiguration(config);
 	}
@@ -75,7 +72,7 @@ public class DAOTest {
 		
 		Date lastModified = root.getLastModified();
 	
-		Folder folder = Folder.builder().name("SomeFolder").parent(root)
+		Folder folder = Folder.builder().name("SomeFolder").parentId(Node.ROOT_NODE_ID)
 				.build();
 
 		Node newNode = configDAO.createFolder(folder);
@@ -88,13 +85,14 @@ public class DAOTest {
 		assertTrue(root.getLastModified().getTime() > lastModified.getTime());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
 	@FlywayTest(invokeCleanDB = true)
-	public void testNewFolderNoParent() {
+	public void testNewFolderNoParentImpliesRootFolerAsParent() {
 
 		Folder folderFromClient = Folder.builder().name("SomeFolder").build();
 
-		configDAO.createFolder(folderFromClient);
+		Folder newFolder = configDAO.createFolder(folderFromClient);
+		
+		assertEquals(Node.ROOT_NODE_ID, newFolder.getId());
 
 	}
 
@@ -102,7 +100,7 @@ public class DAOTest {
 	@FlywayTest(invokeCleanDB = true)
 	public void testNewFolderWithDuplicateName() {
 
-		Folder folderFromClient = Folder.builder().name("SomeFolder").parent(configDAO.getFolder(Node.ROOT_NODE_ID))
+		Folder folderFromClient = Folder.builder().name("SomeFolder").parentId(Node.ROOT_NODE_ID)
 				.build();
 
 		// Create a new folder
@@ -117,11 +115,10 @@ public class DAOTest {
 	@FlywayTest(invokeCleanDB = true)
 	public void testNewFolderNoDuplicateName() {
 
-		Node parentNode = configDAO.getFolder(Node.ROOT_NODE_ID);
+		
+		Folder folder1 = Folder.builder().name("Folder 1").parentId(Node.ROOT_NODE_ID).build();
 
-		Folder folder1 = Folder.builder().name("Folder 1").parent(parentNode).build();
-
-		Folder folder2 = Folder.builder().name("Folder 2").parent(parentNode).build();
+		Folder folder2 = Folder.builder().name("Folder 2").parentId(Node.ROOT_NODE_ID).build();
 
 		// Create a new folder
 		assertNotNull(configDAO.createFolder(folder1));
@@ -135,11 +132,10 @@ public class DAOTest {
 	@FlywayTest(invokeCleanDB = true)
 	public void testNewConfig() {
 
-		Node parentNode = configDAO.getFolder(Node.ROOT_NODE_ID);
-
+		
 		ConfigPv configPv = ConfigPv.builder().groupname("groupname").pvName("pvName").tags("tags").build();
 
-		Config config = Config.builder().active(true).description("description").system("system").parent(parentNode)
+		Config config = Config.builder().active(true).description("description").system("system").parentId(Node.ROOT_NODE_ID)
 				.name("My config").configPvList(Arrays.asList(configPv)).build();
 
 		Config newConfig = configDAO.createConfiguration(config);
@@ -148,7 +144,7 @@ public class DAOTest {
 
 		int configPvId = newConfig.getConfigPvList().get(0).getId();
 
-		config = Config.builder().active(true).description("description").system("system").parent(parentNode)
+		config = Config.builder().active(true).description("description").system("system").parentId(Node.ROOT_NODE_ID)
 				.name("My config 2").configPvList(Arrays.asList(configPv)).build();
 
 		newConfig = configDAO.createConfiguration(config);
@@ -162,11 +158,9 @@ public class DAOTest {
 	@FlywayTest(invokeCleanDB = true)
 	public void testNewConfigNoConfigPvs() {
 
-		Node node = configDAO.getFolder(Node.ROOT_NODE_ID);
-
 		Config config = Config.builder().active(true).description("description").system("system").build();
 
-		config.setParent(node);
+		config.setParent(Node.ROOT_NODE_ID);
 		config.setName("My config");
 
 		Config newConfig = configDAO.createConfiguration(config);
@@ -178,11 +172,9 @@ public class DAOTest {
 	@FlywayTest(invokeCleanDB = true)
 	public void testDeleteConfiguration() {
 
-		Node parentNode = configDAO.getFolder(Node.ROOT_NODE_ID);
-
 		Config config = Config.builder().active(true).description("description").system("system").build();
 
-		config.setParent(parentNode);
+		config.setParentId(Node.ROOT_NODE_ID);
 		config.setName("My config");
 
 		config = configDAO.createConfiguration(config);
@@ -198,14 +190,12 @@ public class DAOTest {
 	@FlywayTest(invokeCleanDB = true)
 	public void testDeleteConfigurationAndPvs() {
 
-		Node parentNode = configDAO.getFolder(Node.ROOT_NODE_ID);
-
 		ConfigPv configPv = ConfigPv.builder().groupname("group").readonly(true).tags("tags").pvName("pvName").build();
 
 		Config config = Config.builder().active(true).description("description").system("system")
 				.configPvList(Arrays.asList(configPv)).build();
 
-		config.setParent(parentNode);
+		config.setParentId(Node.ROOT_NODE_ID);
 		config.setName("My config");
 
 		config = configDAO.createConfiguration(config);
@@ -229,16 +219,16 @@ public class DAOTest {
 
 		Date rootLastModified = root.getLastModified();
 
-		Folder folder1 = Folder.builder().name("SomeFolder").parent(root).build();
+		Folder folder1 = Folder.builder().name("SomeFolder").parentId(Node.ROOT_NODE_ID).build();
 
 		folder1 = configDAO.createFolder(folder1);
 
-		Folder folder2 = Folder.builder().name("SomeFolder").parent(folder1).build();
+		Folder folder2 = Folder.builder().name("SomeFolder").parentId(folder1.getId()).build();
 
 		folder2 = configDAO.createFolder(folder2);
 
 		Config config = configDAO
-				.createConfiguration(Config.builder().name("Config").description("Desc").parent(folder2).build());
+				.createConfiguration(Config.builder().name("Config").description("Desc").parentId(folder2.getId()).build());
 
 		configDAO.deleteNode(folder1.getId());
 
@@ -253,12 +243,9 @@ public class DAOTest {
 			// Expected = OK
 		}
 
-		try {
-			configDAO.getFolder(folder2.getId());
-			fail("NodeNotFoundException expected here.");
-		} catch (NodeNotFoundException e) {
-			// Expected = OK
-		}
+		
+		assertNull(configDAO.getFolder(folder2.getId()));
+			
 	}
 
 	@Test
@@ -275,7 +262,7 @@ public class DAOTest {
 		Config config1 = Config.builder().active(true).description("description").system("system")
 				.configPvList(Arrays.asList(configPv1, configPv2)).build();
 
-		config1.setParent(parentNode);
+		config1.setParentId(parentNode.getId());
 		config1.setName("My config");
 
 		config1 = configDAO.createConfiguration(config1);
@@ -283,7 +270,7 @@ public class DAOTest {
 		Config config2 = Config.builder().active(true).description("description").system("system")
 				.configPvList(Arrays.asList(configPv2)).build();
 
-		config2.setParent(parentNode);
+		config2.setParentId(parentNode.getId());
 		config2.setName("My config 2");
 
 		config2 = configDAO.createConfiguration(config2);
@@ -300,9 +287,9 @@ public class DAOTest {
 	@FlywayTest(invokeCleanDB = false)
 	public void testGetNodeAsConfig() {
 
-		Node parentNode = configDAO.getFolder(Node.ROOT_NODE_ID);
+		Folder parentNode = configDAO.getFolder(Node.ROOT_NODE_ID);
 
-		Config config = Config.builder().active(true).name("My config 3").parent(parentNode).description("description")
+		Config config = Config.builder().active(true).name("My config 3").parentId(parentNode.getId()).description("description")
 				.system("system").build();
 
 		Config newConfig = configDAO.createConfiguration(config);
@@ -316,7 +303,7 @@ public class DAOTest {
 	@FlywayTest(invokeCleanDB = true)
 	public void testSaveSnapshot() {
 
-		Config config = Config.builder().active(true).name("My config 3").parent(configDAO.getFolder(Node.ROOT_NODE_ID))
+		Config config = Config.builder().active(true).name("My config 3").parentId(Node.ROOT_NODE_ID)
 				.description("description").system("system")
 				.configPvList(Arrays.asList(ConfigPv.builder().pvName("whatever").build())).build();
 
@@ -374,28 +361,22 @@ public class DAOTest {
 
 	@Test(expected = NodeNotFoundException.class)
 	@FlywayTest(invokeCleanDB = true)
-	public void testGetNonexistingFolder() {
-
-		configDAO.getFolder(-1);
-	}
-
-	@Test(expected = NodeNotFoundException.class)
-	@FlywayTest(invokeCleanDB = true)
 	public void testMoveNodeIllegalSource() {
 
-		Folder folderFromClient = Folder.builder().name("SomeFolder").parent(configDAO.getFolder(Node.ROOT_NODE_ID))
+		Folder folderFromClient = Folder.builder().name("SomeFolder").parentId(Node.ROOT_NODE_ID)
 				.build();
 
 		Folder folder1 = configDAO.createFolder(folderFromClient);
 
 		configDAO.moveNode(-1, folder1.getId());
 	}
-
+	
+	
 	@Test(expected = NodeNotFoundException.class)
 	@FlywayTest(invokeCleanDB = true)
 	public void testMoveNodeIllegalTarget() {
 
-		Folder folderFromClient = Folder.builder().name("SomeFolder").parent(configDAO.getFolder(Node.ROOT_NODE_ID))
+		Folder folderFromClient = Folder.builder().name("SomeFolder").parentId(Node.ROOT_NODE_ID)
 				.build();
 
 		Folder folder1 = configDAO.createFolder(folderFromClient);
@@ -409,15 +390,15 @@ public class DAOTest {
 
 		Folder root = configDAO.getFolder(Node.ROOT_NODE_ID);
 
-		Folder folder1 = Folder.builder().name("SomeFolder").parent(root).build();
+		Folder folder1 = Folder.builder().name("SomeFolder").parentId(Node.ROOT_NODE_ID).build();
 
 		folder1 = configDAO.createFolder(folder1);
 
-		Folder folder2 = Folder.builder().name("SomeFolder").parent(folder1).build();
+		Folder folder2 = Folder.builder().name("SomeFolder").parentId(folder1.getId()).build();
 
 		folder2 = configDAO.createFolder(folder2);
 
-		configDAO.createConfiguration(Config.builder().name("Config").description("Desc").parent(folder2).build());
+		configDAO.createConfiguration(Config.builder().name("Config").description("Desc").parentId(folder2.getId()).build());
 
 		configDAO.moveNode(folder2.getId(), root.getId());
 	}
@@ -428,12 +409,12 @@ public class DAOTest {
 
 		Folder root = configDAO.getFolder(Node.ROOT_NODE_ID);
 
-		configDAO.createConfiguration(Config.builder().name("Config").description("Desc").parent(root).build());
+		configDAO.createConfiguration(Config.builder().name("Config").description("Desc").parentId(Node.ROOT_NODE_ID).build());
 
-		Folder folder1 = configDAO.createFolder(Folder.builder().name("SomeFolder").parent(root).build());
+		Folder folder1 = configDAO.createFolder(Folder.builder().name("SomeFolder").parentId(Node.ROOT_NODE_ID).build());
 
 		Config config2 = configDAO
-				.createConfiguration(Config.builder().name("Config").description("Desc").parent(folder1).build());
+				.createConfiguration(Config.builder().name("Config").description("Desc").parentId(folder1.getId()).build());
 
 		configDAO.moveNode(config2.getId(), root.getId());
 
@@ -445,7 +426,7 @@ public class DAOTest {
 
 		Folder root = configDAO.getFolder(Node.ROOT_NODE_ID);
 
-		Folder folder1 = Folder.builder().name("SomeFolder").parent(root).build();
+		Folder folder1 = Folder.builder().name("SomeFolder").parentId(Node.ROOT_NODE_ID).build();
 
 		folder1 = configDAO.createFolder(folder1);
 
@@ -454,7 +435,7 @@ public class DAOTest {
 		// Root node has one child node
 		assertEquals(1, root.getChildNodes().size());
 
-		Folder folder2 = Folder.builder().name("SomeFolder2").parent(folder1).build();
+		Folder folder2 = Folder.builder().name("SomeFolder2").parentId(folder1.getId()).build();
 
 		folder2 = configDAO.createFolder(folder2);
 
@@ -463,7 +444,7 @@ public class DAOTest {
 		// SomeFolder has one child node
 		assertEquals(1, folder1.getChildNodes().size());
 
-		configDAO.createConfiguration(Config.builder().name("Config").description("Desc").parent(folder2).build());
+		configDAO.createConfiguration(Config.builder().name("Config").description("Desc").parentId(folder2.getId()).build());
 
 		Date lastModifiedOfSource = folder1.getLastModified();
 		Date lastModifiedOfTarget = root.getLastModified();
@@ -494,14 +475,12 @@ public class DAOTest {
 	@FlywayTest(invokeCleanDB = true)
 	public void testUpdateConfig() {
 
-		Folder root = configDAO.getFolder(Node.ROOT_NODE_ID);
-
-		Folder folder1 = configDAO.createFolder(Folder.builder().name("SomeFolder").parent(root).build());
+		Folder folder1 = configDAO.createFolder(Folder.builder().name("SomeFolder").parentId(Node.ROOT_NODE_ID).build());
 
 		ConfigPv configPv1 = ConfigPv.builder().pvName("configPv1").build();
 		ConfigPv configPv2 = ConfigPv.builder().pvName("configPv2").build();
 
-		Config config = Config.builder().active(true).name("My config").parent(folder1).description("description")
+		Config config = Config.builder().active(true).name("My config").parentId(folder1.getId()).description("description")
 				.name("name")
 				.system("system").configPvList(Arrays.asList(configPv1, configPv2)).build();
 
@@ -539,7 +518,7 @@ public class DAOTest {
 		assertEquals(2, fullSnapshot.getSnapshotPvList().size());
 
 		Config updatedConfig = Config.builder().id(config.getId()).active(true).name("My updated config")
-				.parent(folder1).description("Updated description").system("Updated system")
+				.parentId(folder1.getId()).description("Updated description").system("Updated system")
 				.configPvList(Arrays.asList(configPv1)).build();
 		
 
@@ -550,6 +529,18 @@ public class DAOTest {
 		// Verify that last modified time has been updated
 		assertTrue(updatedConfig.getLastModified().getTime() > lastModified.getTime());
 
+	}
+	
+	@Test(expected = NodeNotFoundException.class)
+	public void testUpdateNonExistinConfiguration() {
+		
+		configDAO.updateConfiguration(Config.builder().id(-1).build());
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testUpdateNodethatIsNotConfiguration() {
+		
+		configDAO.updateConfiguration(Config.builder().id(Node.ROOT_NODE_ID).build());
 	}
 
 	@Test
@@ -570,18 +561,23 @@ public class DAOTest {
 		configDAO.getConfiguration(Node.ROOT_NODE_ID);
 
 	}
+	
+	@Test
+	public void testNonExistingFolder() {
+
+		assertNull(configDAO.getFolder(-1));
+
+	}
 
 	@Test(expected = NodeNotFoundException.class)
 	@FlywayTest(invokeCleanDB = true)
 	public void testGetFolderThatIsNotAFolder() {
 
-		Folder root = configDAO.getFolder(Node.ROOT_NODE_ID);
-
-		Folder folder1 = configDAO.createFolder(Folder.builder().name("SomeFolder").parent(root).build());
+		Folder folder1 = configDAO.createFolder(Folder.builder().name("SomeFolder").parentId(Node.ROOT_NODE_ID).build());
 
 		ConfigPv configPv1 = ConfigPv.builder().pvName("configPv1").build();
 
-		Config config = Config.builder().active(true).name("My config").parent(folder1).description("description")
+		Config config = Config.builder().active(true).name("My config").parentId(folder1.getId()).description("description")
 				.system("system").configPvList(Arrays.asList(configPv1)).build();
 
 		config = configDAO.createConfiguration(config);
@@ -615,12 +611,10 @@ public class DAOTest {
 	@Test(expected = IllegalArgumentException.class)
 	@FlywayTest(invokeCleanDB = true)
 	public void testRenameFolderNameAlreadyExists() {
+			
+		configDAO.createFolder(Folder.builder().name("Folder1").parentId(Node.ROOT_NODE_ID).build());
 		
-		Folder root = configDAO.getFolder(Node.ROOT_NODE_ID);
-		
-		configDAO.createFolder(Folder.builder().name("Folder1").parent(root).build());
-		
-		Folder folder2 = configDAO.createFolder(Folder.builder().name("Folder2").parent(root).build());
+		Folder folder2 = configDAO.createFolder(Folder.builder().name("Folder2").parentId(Node.ROOT_NODE_ID).build());
 		
 		configDAO.renameNode(folder2.getId(), "Folder1");
 	}
@@ -628,12 +622,12 @@ public class DAOTest {
 	@Test(expected = IllegalArgumentException.class)
 	@FlywayTest(invokeCleanDB = true)
 	public void testRenameConfigNameAlreadyExists() {
+			
+		configDAO.createConfiguration(Config.builder().description("description")
+				.name("Config1").parentId(Node.ROOT_NODE_ID).build());
 		
-		Folder root = configDAO.getFolder(Node.ROOT_NODE_ID);
-		
-		configDAO.createConfiguration(Config.builder().description("description").name("Config1").parent(root).build());
-		
-		Config config2 = configDAO.createConfiguration(Config.builder().description("description").name("Config2").parent(root).build());
+		Config config2 = configDAO.createConfiguration(Config.builder().
+				description("description").name("Config2").parentId(Node.ROOT_NODE_ID).build());
 		
 		configDAO.renameNode(config2.getId(), "Config1");
 	}
@@ -641,14 +635,14 @@ public class DAOTest {
 	@Test
 	@FlywayTest(invokeCleanDB = true)
 	public void testRenameFolder(){
-		
-		Folder root = configDAO.getFolder(Node.ROOT_NODE_ID);
-		
-		Folder folder1 = configDAO.createFolder(Folder.builder().name("Folder1").parent(root).build());
+			
+		Folder folder1 = configDAO.createFolder(Folder.builder()
+				.name("Folder1").parentId(Node.ROOT_NODE_ID).build());
 		
 		Date lastModified = folder1.getLastModified();
 		
-		configDAO.createConfiguration(Config.builder().description("whatever").name("Config1").parent(root).build());
+		configDAO.createConfiguration(Config.builder().description("whatever")
+				.name("Config1").parentId(Node.ROOT_NODE_ID).build());
 		
 		configDAO.renameNode(folder1.getId(), "NewName");
 		

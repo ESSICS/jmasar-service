@@ -1,8 +1,11 @@
-The code provided in this project is to be regarded as being in a beta state.
-
 The jmasar-service implements the MAchine Save And Restore service as a collection
 of REST endpoints. These can be used by clients to create and manage configurations and
 snapshots. 
+
+NOTE: the R(estore) portion of the name JMasar is a bit misleading. The service does not provide
+a way to restore/write PV values. However, it provides an API to retrieve PV values
+that have been persisted in a snapshot at some point in time. A client application may
+then use these values to perform the restore operation.
 
 The service depends on the jmasar-model artifact (separate git repository). 
 Java-based clients should also make use of jmasar-model to facilitate 

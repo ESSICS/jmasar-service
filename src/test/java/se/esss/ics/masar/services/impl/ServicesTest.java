@@ -20,7 +20,6 @@ import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,14 +32,13 @@ import se.esss.ics.masar.epics.exception.PVReadException;
 import se.esss.ics.masar.model.Config;
 import se.esss.ics.masar.model.ConfigPv;
 import se.esss.ics.masar.model.Folder;
-import se.esss.ics.masar.model.Node;
 import se.esss.ics.masar.model.Snapshot;
 import se.esss.ics.masar.model.SnapshotPv;
 import se.esss.ics.masar.persistence.dao.ConfigDAO;
 import se.esss.ics.masar.persistence.dao.SnapshotDAO;
 import se.esss.ics.masar.services.IServices;
 import se.esss.ics.masar.services.config.ServicesTestConfig;
-import se.esss.ics.masar.services.exception.ConfigNotFoundException;
+import se.esss.ics.masar.services.exception.NodeNotFoundException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextHierarchy({ @ContextConfiguration(classes = { ServicesTestConfig.class}) })
@@ -136,7 +134,7 @@ public class ServicesTest {
 		services.takeSnapshot(1);
 	}
 	
-	@Test(expected = ConfigNotFoundException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testTakeSnapshotConfigNotFound() {
 		
 		services.takeSnapshot(2);
@@ -281,12 +279,12 @@ public class ServicesTest {
 		reset(configDAO);
 	}
 	
-	@Test
-	public void testGetFolder() {
+	
+	@Test(expected = NodeNotFoundException.class)
+	public void testGetNonExsitingFolder() {
 			
-		services.getFolder(1);
-		
-		verify(configDAO, atLeast(1)).getFolder(1);
+		when(configDAO.getFolder(77)).thenReturn(null);
+		services.getFolder(77);
 		
 		reset(configDAO);
 	}

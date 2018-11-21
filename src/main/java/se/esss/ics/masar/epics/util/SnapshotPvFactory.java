@@ -258,9 +258,4 @@ public class SnapshotPvFactory {
 			throw new PVConversionException("Encountered unexpected PV field type: " + pvField.getClass().getName());
 		}
 	}
-
-	private static int getDtype(PVField pvField) {
-		// TODO determine how to set the dtype field from the PVField type
-		return 0;
-	}
 }

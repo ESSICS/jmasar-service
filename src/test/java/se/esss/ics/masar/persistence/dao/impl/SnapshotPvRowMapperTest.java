@@ -1,12 +1,11 @@
 package se.esss.ics.masar.persistence.dao.impl;
 
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import se.esss.ics.masar.persistence.dao.impl.SnapshotPvRowMapper;
-
-import static org.junit.Assert.*;
 
 public class SnapshotPvRowMapperTest {
 	

@@ -97,7 +97,7 @@ public class ConfigJdbcDAO implements ConfigDAO {
 		if (node instanceof Folder) {
 			return (Folder) node;
 		} else {
-			throw new NodeNotFoundException(String.format("Node id=%d is not a folder node", nodeId));
+			throw new IllegalArgumentException(String.format("Node id=%d is not a folder node", nodeId));
 		}
 	}
 
@@ -106,10 +106,13 @@ public class ConfigJdbcDAO implements ConfigDAO {
 	public Config getConfiguration(int nodeId) {
 
 		Node node = getNode(nodeId);
+		if(node == null) {
+			return null;
+		}
 		if (node instanceof Config) {
 			return (Config) node;
 		} else {
-			throw new NodeNotFoundException(String.format("Node id=%d is not a configuration node", nodeId));
+			throw new IllegalArgumentException(String.format("Node id=%d is not a configuration node", nodeId));
 		}
 
 	}
@@ -139,6 +142,10 @@ public class ConfigJdbcDAO implements ConfigDAO {
 		
 		if (parentNode == null) {
 			throw new IllegalArgumentException("Cannot create new node as parent node does not exist.");
+		}
+		
+		if(!parentNode.getNodeType().equals(NodeType.FOLDER)) {
+			throw new IllegalArgumentException("Parent node is not a folder.");
 		}
 
 		// The node to be created cannot have same name and type as any of the parent's
@@ -289,7 +296,7 @@ public class ConfigJdbcDAO implements ConfigDAO {
 
 		// Root node may not be deleted
 		if (nodeId == Node.ROOT_NODE_ID) {
-			return;
+			throw new IllegalArgumentException("Root node cannot be deleted");
 		}
 		Node nodeToDelete = getNode(nodeId);
 		
@@ -375,7 +382,7 @@ public class ConfigJdbcDAO implements ConfigDAO {
 		Folder targetNode = getFolder(targetNodeId);
 		
 		if(targetNode == null) {
-			throw new NodeNotFoundException(String.format("Traget node with id=%d not found", nodeId));
+			throw new IllegalArgumentException(String.format("Traget node with id=%d not found", nodeId));
 		}
 
 		if (doesNameClash(sourceNode, targetNode.getChildNodes())) {

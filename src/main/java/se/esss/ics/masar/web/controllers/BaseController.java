@@ -26,7 +26,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 
-import se.esss.ics.masar.services.exception.ConfigNotFoundException;
 import se.esss.ics.masar.services.exception.NodeNotFoundException;
 import se.esss.ics.masar.services.exception.SnapshotNotFoundException;
 
@@ -37,13 +36,13 @@ public abstract class BaseController {
 	
 	private Logger logger = LoggerFactory.getLogger(BaseController.class);
 
-	@ExceptionHandler(ConfigNotFoundException.class)
-	public ResponseEntity<String> handleConfigNotFoundException(HttpServletRequest req,
-			ConfigNotFoundException exception) {
-		log(exception);
-		return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
-	}
 
+	/**
+	 * Intercepts {@link SnapshotNotFoundException} and triggers a {@link HttpStatus#NOT_FOUND}.
+	 * @param req The servlet request
+	 * @param exception The exception to intercept
+	 * @return A {@link ResponseEntity} carrying the underlying exception message.
+	 */
 	@ExceptionHandler(SnapshotNotFoundException.class)
 	public ResponseEntity<String> handleSnapshotNotFoundException(HttpServletRequest req,
 			SnapshotNotFoundException exception) {
@@ -51,6 +50,12 @@ public abstract class BaseController {
 		return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
 	}
 	
+	/**
+	 * Intercepts {@link IllegalArgumentException} and triggers a {@link HttpStatus#BAD_REQUEST}.
+	 * @param req The servlet request
+	 * @param exception The exception to intercept
+	 * @return A {@link ResponseEntity} carrying the underlying exception message.
+	 */
 	@ExceptionHandler(IllegalArgumentException.class)
 	public ResponseEntity<String> handleIllegalArgumentException(HttpServletRequest req,
 			IllegalArgumentException exception) {
@@ -58,6 +63,12 @@ public abstract class BaseController {
 		return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);
 	}
 	
+	/**
+	 * Intercepts {@link NodeNotFoundException} and triggers a {@link HttpStatus#NOT_FOUND}.
+	 * @param req The servlet request
+	 * @param exception The exception to intercept
+	 * @return A {@link ResponseEntity} carrying the underlying exception message.
+	 */
 	@ExceptionHandler(NodeNotFoundException.class)
 	public ResponseEntity<String> handleNodeNotFoundException(HttpServletRequest req,
 			NodeNotFoundException exception) {

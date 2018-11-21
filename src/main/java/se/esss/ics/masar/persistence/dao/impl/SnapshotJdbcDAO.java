@@ -27,9 +27,13 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import se.esss.ics.masar.model.Config;
 import se.esss.ics.masar.model.Snapshot;
 import se.esss.ics.masar.model.SnapshotPv;
+import se.esss.ics.masar.persistence.dao.ConfigDAO;
 import se.esss.ics.masar.persistence.dao.SnapshotDAO;
+import se.esss.ics.masar.services.exception.NodeNotFoundException;
+import se.esss.ics.masar.services.exception.SnapshotNotFoundException;
 
 public class SnapshotJdbcDAO implements SnapshotDAO {
 
@@ -41,16 +45,26 @@ public class SnapshotJdbcDAO implements SnapshotDAO {
 
 	@Autowired
 	private ObjectMapper objectMapper;
+	
+	@Autowired
+	private ConfigDAO configDAO;
 
 	private static final int NO_USER = -1;
 
 	@Override
 	public void commitSnapshot(int snapshotId, String userName, String comment) {
+		
+		Snapshot snapshot = getSnapshot(snapshotId, false);
+		
+		if(snapshot == null) {
+			throw new SnapshotNotFoundException(String.format("Snapshot with id=%d not found", snapshotId));
+		}
 
 		int userId = getUserNameId(userName);
 		if (userId == NO_USER) {
 			userId = userNameInsert.executeAndReturnKey(Collections.singletonMap("name", userName)).intValue();
 		}
+		
 
 		jdbcTemplate.update("update snapshot set username_id=?, comment=? where id=?", userId, comment, snapshotId);
 	}
@@ -66,6 +80,13 @@ public class SnapshotJdbcDAO implements SnapshotDAO {
 
 	@Override
 	public List<Snapshot> getSnapshots(int configId) {
+		
+		Config config = configDAO.getConfiguration(configId);
+		
+		if(config == null) {
+			throw new NodeNotFoundException(String.format("Configuration with id=%d does not exist", configId));
+		}
+		
 		return jdbcTemplate.query(
 				"select snapshot.id, config_id, username_id, created, comment, approve, snapshot.name from snapshot join "
 						+ "username on snapshot.username_id=username.id where snapshot.config_id=?",

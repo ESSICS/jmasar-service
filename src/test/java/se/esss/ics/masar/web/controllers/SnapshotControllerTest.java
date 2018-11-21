@@ -162,5 +162,26 @@ public class SnapshotControllerTest {
 
 		mockMvc.perform(request).andExpect(status().isNotFound());
 	}
+	
+	@Test
+	public void testCommitRequestNoUserNameOrComment() throws Exception{
+		MockHttpServletRequestBuilder request = post("/snapshot/9");
+		
+		mockMvc.perform(request).andExpect(status().isBadRequest());
+	}
+	
+	@Test
+	public void testCommitRequestEmptyUserName() throws Exception{
+		MockHttpServletRequestBuilder request = post("/snapshot/9?userName=&comment=comment");
+		
+		mockMvc.perform(request).andExpect(status().isBadRequest());
+	}
+	
+	@Test
+	public void testCommitRequestEmptyComment() throws Exception{
+		MockHttpServletRequestBuilder request = post("/snapshot/9?userName=foo&comment=");
+		
+		mockMvc.perform(request).andExpect(status().isBadRequest());
+	}
 
 }

@@ -1,9 +1,8 @@
 package se.esss.ics.masar.epics.exception;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
-import se.esss.ics.masar.epics.exception.PVConversionException;
+import org.junit.Test;
 
 public class PVConversionExceptionTest {
 	

@@ -1,6 +1,5 @@
 package se.esss.ics.masar.persistence.dao.impl;
 
-import static org.assertj.core.api.Assertions.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -127,6 +126,24 @@ public class DAOTest {
 		assertNotNull(configDAO.createFolder(folder2));
 
 	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	@FlywayTest(invokeCleanDB = true)
+	public void testNewFolderParentIsConfiguration() {
+
+		
+		ConfigPv configPv = ConfigPv.builder().groupname("groupname").pvName("pvName").tags("tags").build();
+
+		Config config = Config.builder().active(true).description("description").system("system").parentId(Node.ROOT_NODE_ID)
+				.name("My config").configPvList(Arrays.asList(configPv)).build();
+
+		Config newConfig = configDAO.createConfiguration(config);
+		
+		Folder folder1 = Folder.builder().name("Folder 1").parentId(newConfig.getId()).build();
+		
+		configDAO.createFolder(folder1);
+
+	}
 
 	@Test
 	@FlywayTest(invokeCleanDB = true)
@@ -168,7 +185,7 @@ public class DAOTest {
 		assertTrue(newConfig.getConfigPvList().isEmpty());
 	}
 
-	@Test(expected = NodeNotFoundException.class)
+	@Test
 	@FlywayTest(invokeCleanDB = true)
 	public void testDeleteConfiguration() {
 
@@ -181,10 +198,10 @@ public class DAOTest {
 
 		configDAO.deleteNode(config.getId());
 
-		// Config deleted, this throws an exception
-		configDAO.getConfiguration(config.getId());
+		assertNull(configDAO.getConfiguration(config.getId()));
 
 	}
+
 
 	@Test
 	@FlywayTest(invokeCleanDB = true)
@@ -236,13 +253,7 @@ public class DAOTest {
 	
 		assertTrue(root.getLastModified().getTime() > rootLastModified.getTime());
 
-		try {
-			configDAO.getConfiguration(config.getId());
-			fail("NodeNotFoundException expected here.");
-		} catch (NodeNotFoundException e) {
-			// Expected = OK
-		}
-
+		assertNull(configDAO.getConfiguration(config.getId()));
 		
 		assertNull(configDAO.getFolder(folder2.getId()));
 			
@@ -350,13 +361,11 @@ public class DAOTest {
 		snapshotDAO.commitSnapshot(newSnapshot.getId(), "user", "comment");
 	}
 
-	@Test
+	@Test(expected = NodeNotFoundException.class)
 	@FlywayTest(invokeCleanDB = true)
 	public void testGetSnapshotsNoSnapshots() {
 
-		List<Snapshot> snapshots = snapshotDAO.getSnapshots(-1);
-
-		assertTrue(snapshots.isEmpty());
+		snapshotDAO.getSnapshots(-1);
 	}
 
 	@Test(expected = NodeNotFoundException.class)
@@ -372,7 +381,7 @@ public class DAOTest {
 	}
 	
 	
-	@Test(expected = NodeNotFoundException.class)
+	@Test(expected = IllegalArgumentException.class)
 	@FlywayTest(invokeCleanDB = true)
 	public void testMoveNodeIllegalTarget() {
 
@@ -543,19 +552,16 @@ public class DAOTest {
 		configDAO.updateConfiguration(Config.builder().id(Node.ROOT_NODE_ID).build());
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	@FlywayTest(invokeCleanDB = true)
 	public void testDeleteRootNode() {
 
-		// Try to delete root folder (id = 1)
+		// Try to delete root folder (id = 0)
 		configDAO.deleteNode(Node.ROOT_NODE_ID);
-
-		// Root folder still there!
-		assertNotNull(configDAO.getFolder(Node.ROOT_NODE_ID));
 
 	}
 
-	@Test(expected = NodeNotFoundException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testGetConfigThatIsNotAConfig() {
 
 		configDAO.getConfiguration(Node.ROOT_NODE_ID);
@@ -569,7 +575,7 @@ public class DAOTest {
 
 	}
 
-	@Test(expected = NodeNotFoundException.class)
+	@Test(expected = IllegalArgumentException.class)
 	@FlywayTest(invokeCleanDB = true)
 	public void testGetFolderThatIsNotAFolder() {
 

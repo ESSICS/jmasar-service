@@ -18,6 +18,7 @@
 package se.esss.ics.masar.web.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.ApiOperation;
 import se.esss.ics.masar.model.Snapshot;
+import se.esss.ics.masar.model.SnapshotPv;
 import se.esss.ics.masar.services.IServices;
 
 @RestController
@@ -36,12 +38,30 @@ public class SnapshotController extends BaseController {
 	@Autowired
 	private IServices services;
 
+	/**
+	 * Creates a new snapshot for the specified configuration, and saves it in a "preliminary" state.
+	 * Snapshots in a preliminary state are not visible when listing snapshots, see {@link ConfigurationController#getSnapshots(int)}.
+	 *
+	 * A {@link HttpStatus#BAD_REQUEST} is returned if the specified configuration id does not exist.
+	 * 
+	 * Note that a snapshot will be created even if all PVs listed in the configuration are off-line. 
+	 * @param configId The configuration id.
+	 * @return A {@link Snapshot} object containing the PV values wrapped in a list of {@link SnapshotPv}s.
+	 */
 	@ApiOperation(value = "Take a snapshot, i.e. save preliminary.")
 	@PutMapping("/snapshot/{configId}")
 	public Snapshot takeSnapshot(@PathVariable int configId) {
 		return services.takeSnapshot(configId);
 	}
 
+	/**
+	 * Retrieves a {@link Snapshot} and its list of {@link SnapshotPv}s.
+	 * 
+	 * A {@link HttpStatus#NOT_FOUND} is returned if the specified snapshot id does not exist.
+	 * 
+	 * @param snapshotId The id of the snapshot
+	 * @return A {@link Snapshot} object containing the PV values wrapped in a list of {@link SnapshotPv}s.
+	 */
 	@ApiOperation(value = "Get a snapshot, including its values.", consumes = JSON)
 	@GetMapping("/snapshot/{snapshotId}")
 	public Snapshot getSnapshot(@PathVariable int snapshotId) {
@@ -49,6 +69,13 @@ public class SnapshotController extends BaseController {
 		return services.getSnapshot(snapshotId);
 	}
 
+	/**
+	 * Deletes a {@link Snapshot} and all its PV values.
+	 * 
+	 * A {@link HttpStatus#NOT_FOUND} is returned if the specified snapshot id does not exist.
+	 * 
+	 * @param snapshotId The id of the snapshot
+	 */
 	@ApiOperation(value = "Delete a snapshot", consumes = JSON)
 	@DeleteMapping("/snapshot/{snapshotId}")
 	public void deleteSnapshot(@PathVariable int snapshotId) {
@@ -56,10 +83,27 @@ public class SnapshotController extends BaseController {
 		services.deleteSnapshot(snapshotId);
 	}
 
+	/**
+	 * Commits a snapshot such that it will be visible when listing snapshots for a configuration,
+	 * see {@link ConfigurationController#getSnapshots(int)}.
+	 * 
+	 * A {@link HttpStatus#NOT_FOUND} is returned if the specified snapshot id does not exist.
+	 * 
+	 * A {@link HttpStatus#BAD_REQUEST} is returned if the user name or comment are null or of zero length.
+	 *  
+	 * @param snapshotId The id of the snapshot
+	 * @param userName Mandatory user name.
+	 * @param comment Mandatory comment.
+	 * @return The committed {@link Snapshot}.
+	 */
 	@ApiOperation(value = "Commit a snapshot, i.e. update with user name and comment.")
 	@PostMapping("/snapshot/{snapshotId}")
 	public Snapshot commitSnapshot(@PathVariable int snapshotId, @RequestParam(required = true) String userName,
 			@RequestParam(required = true) String comment) {
+		
+		if(userName.length() == 0 || comment.length() == 0) {
+			throw new IllegalArgumentException("User name and comment must be of non-zero length");
+		}
 
 		return services.commitSnapshot(snapshotId, userName, comment);
 	}

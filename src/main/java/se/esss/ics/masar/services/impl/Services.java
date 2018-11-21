@@ -36,7 +36,7 @@ import se.esss.ics.masar.model.SnapshotPv;
 import se.esss.ics.masar.persistence.dao.ConfigDAO;
 import se.esss.ics.masar.persistence.dao.SnapshotDAO;
 import se.esss.ics.masar.services.IServices;
-import se.esss.ics.masar.services.exception.ConfigNotFoundException;
+import se.esss.ics.masar.services.exception.NodeNotFoundException;
 import se.esss.ics.masar.services.exception.SnapshotNotFoundException;
 
 
@@ -68,7 +68,11 @@ public class Services implements IServices{
 	@Override
 	public Config getConfiguration(int nodeId) {
 		
-		return configDAO.getConfiguration(nodeId);
+		Config config = configDAO.getConfiguration(nodeId);
+		if(config == null) {
+			throw new NodeNotFoundException(String.format("Configuration with id=%d not found", nodeId));
+		}
+		return config;
 	}
 	
 	@Override
@@ -78,7 +82,7 @@ public class Services implements IServices{
 		Config config = configDAO.getConfiguration(nodeId);
 		
 		if(config == null) {
-			throw new ConfigNotFoundException("Configuration with id=" + nodeId + " does not exist.");
+			throw new IllegalArgumentException("Configuration with id=" + nodeId + " does not exist.");
 		}
 		
 		List<SnapshotPv<?>> snapshotPvs = new ArrayList<>();
@@ -139,7 +143,11 @@ public class Services implements IServices{
 	
 	@Override
 	public Folder getFolder(int nodeId) {
-		return  configDAO.getFolder(nodeId);
+		Folder folder = configDAO.getFolder(nodeId);
+		if(folder == null) {
+			throw new NodeNotFoundException(String.format("Folder with id=%d does not exist", nodeId));
+		}
+		return folder;
 	}
 	
 	

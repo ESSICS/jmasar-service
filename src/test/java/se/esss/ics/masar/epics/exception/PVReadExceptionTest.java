@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import se.esss.ics.masar.epics.exception.PVReadException;
-
 public class PVReadExceptionTest {
 	
 	@Test

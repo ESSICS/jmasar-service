@@ -1,5 +1,6 @@
 package se.esss.ics.masar.web.controllers;
 
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -35,7 +36,6 @@ import se.esss.ics.masar.model.Node;
 import se.esss.ics.masar.model.Snapshot;
 import se.esss.ics.masar.model.SnapshotPv;
 import se.esss.ics.masar.services.IServices;
-import se.esss.ics.masar.services.exception.ConfigNotFoundException;
 import se.esss.ics.masar.services.exception.NodeNotFoundException;
 import se.esss.ics.masar.web.config.ControllersTestConfig;
 
@@ -122,7 +122,6 @@ public class ConfigurationControllerTest {
 		String s = result.getResponse().getContentAsString();
 		// Make sure response contains expected data
 		objectMapper.readValue(s, Folder.class);
-
 	}
 
 	@Test
@@ -141,7 +140,7 @@ public class ConfigurationControllerTest {
 	@Test
 	public void testGetNonExistingConfig() throws Exception {
 
-		when(services.getConfiguration(2)).thenThrow(new ConfigNotFoundException("lasdfk"));
+		when(services.getConfiguration(2)).thenThrow(new NodeNotFoundException("lasdfk"));
 
 		MockHttpServletRequestBuilder request = get("/config/2").contentType(JSON);
 
@@ -166,7 +165,7 @@ public class ConfigurationControllerTest {
 	@Test
 	public void testGetSnapshotsForNonExistingConfig() throws Exception {
 
-		when(services.getSnapshots(2)).thenThrow(new ConfigNotFoundException("lasdfk"));
+		when(services.getSnapshots(2)).thenThrow(new NodeNotFoundException("lasdfk"));
 
 		MockHttpServletRequestBuilder request = get("/config/2/snapshots").contentType(JSON);
 
@@ -185,6 +184,13 @@ public class ConfigurationControllerTest {
 		MockHttpServletRequestBuilder request = delete("/folder/1");
 
 		mockMvc.perform(request).andExpect(status().isOk());
+		
+		doThrow(new IllegalArgumentException()).when(services).deleteNode(0);
+			
+		request = delete("/folder/0");
+		
+		mockMvc.perform(request).andExpect(status().isBadRequest());
+		
 	}
 
 	@Test
@@ -225,12 +231,18 @@ public class ConfigurationControllerTest {
 	}
 	
 	@Test
-	public void testGetNonExistingFoldern() throws Exception {
+	public void testGetNonExistingFolder() throws Exception {
 		when(services.getFolder(1)).thenThrow(NodeNotFoundException.class);
 
 		MockHttpServletRequestBuilder request = get("/folder/1");
 
 		mockMvc.perform(request).andExpect(status().isNotFound());
+		
+		when(services.getFolder(7)).thenThrow(IllegalArgumentException.class);
+		
+		request = get("/folder/7");
+		
+		mockMvc.perform(request).andExpect(status().isBadRequest());
 		
 		Mockito.reset(services);
 	}
